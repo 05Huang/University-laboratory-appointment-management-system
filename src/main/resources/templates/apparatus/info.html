@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('实验室信息')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container-fluid p-t-15">
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="exampleModalLabel">编辑信息</h4>
+        </div>
+        <div class="modal-body">
+          <form id="updateForm">
+            <div class="form-group">
+              <label for="id" class="control-label">ID：</label>
+              <input type="text" name="id" class="form-control" id="id" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="name" class="control-label">设备名称：</label>
+              <input type="text" name="instrumentName" class="form-control" id="name">
+            </div>
+            <div class="form-group">
+              <label for="email" class="control-label">型号：</label>
+              <input type="text" name="model" class="form-control" id="email">
+            </div>
+            <div class="form-group">
+              <label for="phonenumber" class="control-label">价格：</label>
+              <input type="number" name="price" class="form-control" id="phonenumber">
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="type" value="0"><span>常规设备</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="type" value="1"><span>自制设备</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="type" value="2"><span>捐赠设备</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="status" value="0"><span>启用</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="status" value="1"><span>禁用</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="updateBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addModalLabel">新增</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addForm">
+            <div class="form-group">
+              <label for="instrumentName" class="control-label">设备名称：</label>
+              <input type="text" name="instrumentName" id="instrumentName" class="form-control">
+            </div>
+            <div class="form-group">
+              <label class="control-label" for="select">所属组织</label>
+              <select class="form-control" id="select" name="depotId" size="1">
+                <option th:each="depot : ${depots}" th:value="${depot.deptId}" th:text="${depot.deptName}">理学院
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="model" class="control-label">型号：</label>
+              <input type="text" name="model" id="model" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="price" class="control-label">价格：</label>
+              <input type="number" name="price" id="price" class="form-control">
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="type" value="0"><span>常规设备</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="type" value="1"><span>自制设备</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="type" value="2"><span>捐赠设备</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="status" value="0"><span>启用</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="status" value="1"><span>禁用</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="sureBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addPositionModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addPositionLabel">新增位置</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addPositionForm">
+            <div class="form-group">
+              <label for="instrumentId" class="control-label">设备id：</label>
+              <input type="text" name="instrumentId" id="instrumentId" class="form-control" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="position" class="control-label">位置：</label>
+              <input type="text" name="position" id="position" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="detailNumber" class="control-label">储位：</label>
+              <input type="number" name="detailNumber" id="detailNumber" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="comment">备注</label>
+              <textarea class="form-control" id="comment" name="comment" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="surePositionBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addUseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addUseLabel">新增用途</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addUseForm">
+            <div class="form-group">
+              <label for="instrumentId" class="control-label">设备id：</label>
+              <input type="text" name="instrumentId" id="uinstrumentId" class="form-control" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="useTitle" class="control-label">用途名称：</label>
+              <input type="text" name="useTitle" id="useTitle" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="example-select">类别：</label>
+              <div>
+                <select class="form-control" id="example-select" name="type" size="1">
+                  <option th:each="type : ${types}" th:value="${type.type}" th:text="${type.value}">test
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="useDesc">用途描述</label>
+              <textarea class="form-control" id="useDesc" name="useDesc" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="comment">备注</label>
+              <textarea class="form-control" id="ucomment" name="comment" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="sureUseBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-primary m-r-5" href="#!" id="addBtn"><i class="mdi mdi-plus"></i> 新增设备</a>
+            <a class="btn btn-success m-r-5" href="#!" id="enableBtn"><i class="mdi mdi-check"></i> 启用</a>
+            <a class="btn btn-warning m-r-5" href="#!" id="disableBtn"><i class="mdi mdi-block-helper"></i> 禁用</a>
+            <a class="btn btn-danger" href="#!" id="delBtn"><i class="mdi mdi-window-close"></i> 删除</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!-- 表格数据 -->
+            <table id="table"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div th:include="include :: table"></div>
+<script type="text/javascript">
+    $(function () {
+        var idData = [];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table').bootstrapTable({
+            url: '/api/instrument',                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号'
+            }, {
+                field: 'instrumentName',
+                title: '名称'
+            }, {
+                field: 'model',
+                title: '型号'
+            }, {
+                field: 'type',
+                title: '类型',
+                formatter: function (value, row, index) {
+                    if (row.status === '0') {
+                        return '<span class="label label-success">常规设备</span>'
+                    }
+                    if (row.status === '1') {
+                        return '<span class="label label-danger">购入设备</span>'
+                    }
+                    return '<span class="label label-info">捐赠设备</span>'
+                }
+            }, {
+                field: 'price',
+                title: '价格'
+            }, {
+                field: 'createBy',
+                title: '创建人'
+            }, {
+                field: 'status',
+                title: '状态',
+                formatter: function (value, row, index) {
+                    if (row.status === '0') {
+                        return '<span class="label label-success">空闲</span>'
+                    }
+                    if (row.status === '1') {
+                        return '<span class="label label-danger">废弃</span>'
+                    }
+                    if (row.status === '2') {
+                        return '<span class="label label-info">维修中</span>'
+                    }
+                    return '<span class="label label-purple">借用中</span>';
+                }
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #edit': function (e, value, row, index) {
+                        $('#exampleModal').on('show.bs.modal', function (event) {
+                            var modal = $(this)
+                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
+                            modal.find('#id').val(row.id)
+                            modal.find('#instrumentName').val(row.instrumentName)
+                            modal.find('#email').val(row.model)
+                            modal.find('#phonenumber').val(row.price)
+                            modal.find('#status').val(row.status)
+                        })
+                        $('#exampleModal').modal();
+                        $('#updateBtn').click(() => {
+                            let form = $("#updateForm").serializeObject();
+                            form['id'] = row.id;
+                            console.log(form);
+                            axios.put('/api/instrument', form).then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                                $('#exampleModal').modal('hide');
+                            }).catch(err => {
+                                lightyear.notify(err.response.data.message, 'danger', 100);
+                            })
+                        })
+                    },
+                    'click #delete': function (e, value, row, index) {
+                        axios.delete('/api/instrument/' + row.id)
+                            .then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    },
+                    'click #addPosition': function (e, value, row, index) {
+                        $('#addPositionModal').on('show.bs.modal', function (event) {
+                            var modal = $(this)
+                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
+                            modal.find('#instrumentId').val(row.id)
+                        })
+                        $('#addPositionModal').modal();
+                        $('#surePositionBtn').click(() => {
+                            let form = $("#addPositionForm").serializeObject();
+                            form['instrumentId'] = row.id;
+                            console.log(form);
+                            axios.post('/api/position', form).then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                                $('#addPositionModal').modal('hide');
+                            }).catch(err => {
+                                lightyear.notify(err.response.data.message, 'danger', 100);
+                            })
+                        });
+                    },
+                    'click #addUse': function (e, value, row, index) {
+                        $('#addUseModal').on('show.bs.modal', function (event) {
+                            var modal = $(this)
+                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
+                            modal.find('#uinstrumentId').val(row.id)
+                        })
+                        $('#addUseModal').modal();
+                        $('#sureUseBtn').click(() => {
+                            let form = $("#addUseForm").serializeObject();
+                            form['instrumentId'] = row.id;
+                            console.log(form);
+                            axios.post('/api/use', form).then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                                $('#addUseModal').modal('hide');
+                            }).catch(err => {
+                                lightyear.notify(err.response.data.message, 'danger', 100);
+                            })
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-purple btn-xs" href="#!" id="addPosition" title="新增位置"><i class="mdi mdi-map-marker"></i> </a> ';
+                    result += '<a class="btn btn-brown btn-xs" href="#!" id="addUse" title="新增用途"><i class="mdi mdi-math-compass"></i></a> ';
+                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑" ><i class="mdi mdi-pencil"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="delete" href="#!" title="删除"><i class="mdi mdi-window-close"></i></a>';
+                    return result;
+                }
+            }]
+        }),
+
+            $('#addBtn').click(() => {
+                $('#addModal').on('show.bs.modal', function (event) {
+                    var modal = $(this)
+                    modal.find('.modal-title').text('新增设备');
+                })
+                $('#addModal').modal();
+                $('#sureBtn').click(() => {
+                    let form = $("#addForm").serializeObject();
+                    console.log(form);
+                    axios.post('/api/instrument', form).then(res => {
+                        lightyear.notify(res.data, 'success', 100);
+                        $('#addModal').modal('hide');
+                    }).catch(err => {
+                        lightyear.notify(err.response.data.message, 'danger', 100);
+                    })
+                })
+            }),
+
+            $('#enableBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要启用信息', 'warning', 100);
+                    return;
+                }
+
+                let json = getStatusJson('0', idData);
+                axios.patch('/api/instrument', json).then(res => {
+                    idData = [];
+                    lightyear.notify('启用成功', 'success', 100);
+                }).catch(err => {
+                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
+                })
+            }),
+
+            $('#disableBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要启用的信息', 'warning', 100);
+                    return;
+                }
+
+                let json = getStatusJson('1', idData);
+                console.log(json);
+                axios.patch('/api/instrument', json).then(res => {
+                    idData = [];
+                    lightyear.notify('禁用成功', 'success', 100);
+                }).catch(err => {
+                    console.log(err.response);
+                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+                })
+            }),
+
+            $('#delBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
+                    return;
+                }
+                axios({
+                    method: 'delete',
+                    url: '/api/instrument',
+                    data: idData
+                }).then(res => {
+                    idData = [];
+                    lightyear.notify('删除成功', 'success', 100);
+                }).catch(err => {
+                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+                });
+            })
+
+    });
+</script>
+</body>
+</html>

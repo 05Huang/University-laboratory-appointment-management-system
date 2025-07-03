@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('用户管理')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container-fluid p-t-15">
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="exampleModalLabel">编辑信息</h4>
+        </div>
+        <div class="modal-body">
+          <form id="updateForm">
+            <div class="form-group">
+              <label for="umenuId" class="control-label">ID：</label>
+              <input type="text" name="menuId" class="form-control" id="umenuId" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="uparentId" class="control-label">父节点：</label>
+              <input type="text" name="parentId" class="form-control" id="uparentId">
+            </div>
+            <div class="form-group">
+              <label for="umenuName" class="control-label">菜单名：</label>
+              <input type="text" name="menuName" class="form-control" id="umenuName">
+            </div>
+            <div class="form-group">
+              <label for="uorderNum" class="control-label">序号：</label>
+              <input type="number" name="orderNum" class="form-control" id="uorderNum">
+            </div>
+            <div class="form-group">
+              <label for="url" class="control-label">URL：</label>
+              <input type="text" name="url" class="form-control" id="url">
+            </div>
+            <div class="form-group">
+              <label for="uicon" class="control-label">图标：</label>
+              <input type="text" name="icon" class="form-control" id="uicon">
+            </div>
+            <div class="form-group">
+              <label for="uremark" class="control-label">备注：</label>
+              <input type="text" name="remark" class="form-control" id="uremark">
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="visible" value="0"><span>启用</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="visible" value="1"><span>禁用</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="updateBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addModalLabel">新增用户</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addForm">
+            <div class="form-group">
+              <label for="parentId" class="control-label">父节点：</label>
+              <input type="text" name="parentId" class="form-control" id="parentId">
+            </div>
+            <div class="form-group">
+              <label for="menuName" class="control-label">菜单名：</label>
+              <input type="text" name="menuName" class="form-control" id="menuName">
+            </div>
+            <div class="form-group">
+              <label for="orderNum" class="control-label">序号：</label>
+              <input type="number" name="orderNum" class="form-control" id="orderNum">
+            </div>
+            <div class="form-group">
+              <label for="url" class="control-label">URL：</label>
+              <input type="text" name="url" class="form-control" id="uurl">
+            </div>
+            <div class="form-group">
+              <label for="icon" class="control-label">图标：</label>
+              <input type="text" name="icon" class="form-control" id="icon">
+            </div>
+            <div class="form-group">
+              <label for="remark" class="control-label">备注：</label>
+              <input type="text" name="remark" class="form-control" id="remark">
+            </div>
+            <div class="form-group">
+              <div class="example-box">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="visible" value="0"><span>启用</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="visible" value="1"><span>禁用</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="sureBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-primary m-r-5" href="#!" id="addBtn"><i class="mdi mdi-plus"></i> 新增</a>
+            <a class="btn btn-success m-r-5" href="#!" id="enableBtn"><i class="mdi mdi-check"></i> 启用</a>
+            <a class="btn btn-warning m-r-5" href="#!" id="disableBtn"><i class="mdi mdi-block-helper"></i> 禁用</a>
+            <a class="btn btn-danger" href="#!" id="delBtn"><i class="mdi mdi-window-close"></i> 删除</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!--            表格数据-->
+            <table id="table"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<th:block th:include="include :: table" />
+<script type="text/javascript">
+    $(function () {
+        var idData = [];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table').bootstrapTable({
+            url: '/api/sysMenu',                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.menuId)) {
+                    idData.push(row.menuId);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.menuId) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].menuId);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'menuId',
+                align: 'center',
+                valign: 'middle',
+                title: '编号'
+            }, {
+                field: 'parentId',
+                title: '父节点'
+            }, {
+                field: 'menuName',
+                title: '菜单名'
+            }, {
+                field: 'orderNum',
+                title: '序号'
+            }, {
+                field: 'url',
+                title: '链接地址'
+            }, {
+                field: 'target',
+                title: '跳转方式'
+            }, {
+                field: 'visible',
+                title: '可见性'
+            }, {
+                field: 'icon',
+                title: '图标'
+            }, {
+                field: 'createBy',
+                title: '创建人'
+            }, {
+                field: 'createTime',
+                title: '创建时间'
+            }, {
+                field: 'remark',
+                title: '备注'
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #edit': function (e, value, row, index) {
+                        console.log(row);
+                        $('#exampleModal').on('show.bs.modal', function (event) {
+                            var modal = $(this)
+                            modal.find('.modal-title').text('编辑：' + row.menuName);
+                            modal.find('#umenuId').val(row.menuId)
+                            modal.find('#uparenId').val(row.parentId)
+                            modal.find('#umenuName').val(row.menuName)
+                            modal.find('#uorderNum').val(row.orderNum)
+                            modal.find('#url').val(row.url)
+                            modal.find('#uicon').val(row.icon)
+                            modal.find('#uremark').val(row.remark)
+                        })
+                        $('#exampleModal').modal();
+                        $('#updateBtn').click(() => {
+                            let form = $("#updateForm").serializeObject();
+                            form['menuId'] = row.menuId;
+                            form['loginName'] = row.loginName;
+                            console.log(form);
+                            axios.put('/api/sysMenu', form).then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                                $('#exampleModal').modal('hide');
+                            }).catch(err => {
+                                lightyear.notify(err.response.data.message, 'danger', 100);
+                            })
+                        })
+                    },
+                    'click #delete': function (e, value, row, index) {
+                        axios.delete('/api/sysMenu/' + row.menuId)
+                            .then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑" ><i class="mdi mdi-pencil"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="view" href="#!" title="查看" ><i class="mdi mdi-eye"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="delete" href="#!" title="删除"><i class="mdi mdi-window-close"></i></a>';
+                    return result;
+                }
+            }]
+        }),
+
+            $('#addBtn').click(() => {
+                $('#addModal').on('show.bs.modal', function (event) {
+                    var modal = $(this)
+                    modal.find('.modal-title').text('新增用户');
+                })
+
+                $('#addModal').modal();
+                $('#sureBtn').click(() => {
+                    let form = $("#addForm").serializeObject();
+                    console.log(form);
+                    axios.post('/api/sysMenu', form).then(res => {
+                        lightyear.notify(res.data, 'success', 100);
+                        $('#addModal').modal('hide');
+                    }).catch(err => {
+                        lightyear.notify(err.response.data.message, 'danger', 100);
+                    })
+                })
+            }),
+
+            $('#enableBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
+                    return;
+                }
+
+                let json = getStatusJson('0', idData);
+                axios.patch('/api/sysMenu', json).then(res => {
+                    idData = [];
+                    lightyear.notify('启用成功', 'success', 100);
+                }).catch(err => {
+                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
+                })
+            }),
+
+            $('#disableBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
+                    return;
+                }
+
+                let json = getStatusJson('1', idData);
+                console.log(json);
+                axios.patch('/api/sysMenu', json).then(res => {
+                    idData = [];
+                    lightyear.notify('禁用成功', 'success', 100);
+                }).catch(err => {
+                    console.log(err.response);
+                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+                })
+            }),
+
+            $('#delBtn').click(() => {
+                if (idData.length === 0) {
+                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
+                    return;
+                }
+                axios({
+                    method: 'delete',
+                    url: '/api/sysMenu',
+                    data: idData
+                }).then(res => {
+                    idData = [];
+                    lightyear.notify('删除成功', 'success', 100);
+                }).catch(err => {
+                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+                });
+            })
+
+    });
+</script>
+</body>
+</html>

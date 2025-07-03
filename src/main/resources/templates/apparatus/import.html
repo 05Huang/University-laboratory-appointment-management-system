@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('借用设备')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+  <!--日期选择插件-->
+  <link rel="stylesheet" th:href="@{/js/bootstrap-datepicker/bootstrap-datepicker3.min.css}">
+  <link th:href="@{/css/style.min.css}" rel="stylesheet">
+</head>
+
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-lg-6 col-md-6">
+      <div class="card" style="height: 60rem;">
+        <div class="card-header"><h4>维修信息</h4></div>
+        <div class="card-body">
+          <form class="row" id="addForm">
+            <div class="form-group col-md-12 col-lg-12">
+              <label for="createTime">选择维修时间</label>
+              <input class="form-control js-datepicker m-b-10"
+                     type="text" id="createTime" name="createTime"
+                     placeholder="输入维修时间" value="" data-date-format="yyyy-mm-dd"/>
+            </div>
+            <div class="form-group col-md-12 col-lg-12">
+              <label for="updateTime">预计维修完成时间</label>
+              <input class="form-control js-datepicker m-b-10"
+                     type="text" id="updateTime" name="updateTime"
+                     placeholder="输入完成时间" value="" data-date-format="yyyy-mm-dd"/>
+            </div>
+            <div class="form-group col-md-12 col-lg-12">
+              <label for="repairPosition" class="control-label">维修地点：</label>
+              <input type="text" name="repairPosition" class="form-control" id="repairPosition">
+            </div>
+            <div class="form-group col-md-12 col-lg-12">
+              <label for="price">维修价格：</label>
+              <input class="form-control" type="number" id="price" name="price" placeholder="输入维修价格"/>
+            </div>
+            <div class="form-group col-md-12 col-lg-12">
+              <label for="comment">维修原因</label>
+              <textarea class="form-control" id="comment" name="comment" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+            <div class="form-group col-md-12 col-lg-12">
+              <button type="button" class="btn btn-primary ajax-post" id="addBtn">确 定</button>
+              <button type="button" class="btn btn-default">返 回
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-6">
+      <div class="card">
+        <div class="card-header"><h4>设备信息</h4></div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!-- 表格数据 -->
+            <table id="table"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div th:include="include :: table"></div>
+<!--日期选择插件-->
+<script th:src="@{/js/bootstrap-datepicker/bootstrap-datepicker.min.js}"></script>
+<script th:src="@{js/bootstrap-datepicker/locales/bootstrap-datepicker.zh-CN.min.js}"></script>
+<script type="text/javascript">
+    $(function () {
+        var idData = [];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table').bootstrapTable({
+            url: '/api/instrument/repair',                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号'
+            }, {
+                field: 'instrumentName',
+                title: '名称'
+            }, {
+                field: 'model',
+                title: '型号'
+            }, {
+                field: 'type',
+                title: '类型'
+            }, {
+                field: 'price',
+                title: '价格'
+            }]
+        });
+        $('#addBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要维修的设备', 'danger', 100);
+                return;
+            }
+            if (idData.length > 1) {
+                lightyear.notify('只能选择1个设备', 'danger', 100);
+                return;
+            }
+            let form = $("#addForm").serializeObject();
+            console.log(form);
+            if (form.createTime > form.updateTime) {
+                lightyear.notify('预计维修完成时间需大于或等于维修时间', 'danger', 100);
+                return;
+            }
+            form['instrumentId'] = idData[0];
+            console.log(form);
+            axios.post('/api/repair', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            })
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('设备借用审核')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container-fluid p-t-15">
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addPositionLabel">请确定</h4>
+        </div>
+        <div class="modal-body">
+          <form id="updateForm">
+            <div class="form-group">
+              <label for="comment">原因</label>
+              <textarea class="form-control" id="comment" name="comment" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="sureBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-success m-r-5" href="#!" id="enableBtn"><i class="mdi mdi-check"></i> 审核</a>
+            <a class="btn btn-warning m-r-5" href="#!" id="disableBtn"><i class="mdi mdi-block-helper"></i> 驳回</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!--            表格数据-->
+            <table id="table"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div th:include="include :: table"></div>
+<script type="text/javascript">
+    $(function () {
+        var idData = [];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table').bootstrapTable({
+            url: '/api/borrow/laboratory',                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号',
+                width: 50
+            }, {
+                field: 'userId',
+                title: '用户编号',
+                width: 50
+            }, {
+                field: 'userName',
+                title: '借用人姓名'
+            }, {
+                field: 'laboratoryId',
+                title: '实验室编号',
+                width: 50
+            }, {
+                field: 'laboratoryName',
+                title: '实验室名称'
+            }, {
+                field: 'status',
+                title: '状态',
+                width: 50,
+                formatter: function (value, row, index) {
+                    if (row.status === '0') {
+                        return '<span class="label label-success">已审核</span>'
+                    }
+                    if (row.status === '1') {
+                        return '<span class="label label-danger">待审核</span>'
+                    }
+                    if (row.status === '4') {
+                        return '<span class="label label-warning">驳回</span>'
+                    }
+                    if (row.status === '7') {
+                        return '<span class="label label-success">未归还</span>'
+                    }
+                    return '<span class="label label-purple">异常</span>';
+                }
+            }, {
+                field: 'comment',
+                title: '原因',
+                width: 400
+            }, {
+                field: 'createTime',
+                title: '发起时间'
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #disable': function (e, value, row, index) {
+                        if (row.status === '7' || row.status === '4') {
+                            lightyear.notify('已借出或已驳回', 'danger', 100);
+                            return;
+                        }
+                        $('#exampleModal').modal();
+                        $('#sureBtn').click(() => {
+                            let form = $('#updateForm').serializeObject();
+                            let data = {};
+                            data.comment = form.comment;
+                            data.status = '4';
+                            data.id = row.id;
+
+                            axios.patch('/auth/laboratory/' + row.id, data)
+                                .then(res => {
+                                    $('#exampleModal').modal('hide');
+                                    lightyear.notify(res.data, 'success', 100);
+                                }).catch(err => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(err.response, 'danger', 100);
+                            });
+                        });
+                    },
+                    'click #enable': function (e, value, row, index) {
+                        if (row.status === '7') {
+                            lightyear.notify('设备已借出', 'danger', 100);
+                            return;
+                        }
+                        $('#exampleModal').modal();
+                        $('#sureBtn').click(() => {
+                            let form = $('#updateForm').serializeObject();
+                            let data = {};
+                            data.comment = form.comment;
+                            data.status = '7';
+                            data.id = row.id;
+
+                            axios.patch('/auth/laboratory/' + row.id, data)
+                                .then(res => {
+                                    $('#exampleModal').modal('hide');
+                                    lightyear.notify(res.data, 'success', 100);
+                                }).catch(err => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(err.response, 'danger', 100);
+                            });
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-success btn-xs" href="#!" id="enable" title="通过"><i class="mdi mdi-check"></i> 审核通过</a> ';
+                    result += '<a class="btn btn-warning btn-xs" href="#!" id="disable" title="驳回"><i class="mdi mdi-block-helper"></i>驳回申请</a> ';
+                    return result;
+                }
+            }]
+        });
+
+        $('#enableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要审核的信息', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('7', idData);
+            axios.patch('/auth/laboratory', json)
+                .then(res => {
+                    lightyear.notify(res.data, 'success', 100);
+                }).catch(err => {
+                lightyear.notify(err.response, 'danger', 100);
+            });
+        });
+
+        $('#disableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要驳回的信息', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('4', idData);
+            console.log(json);
+            axios.patch('/api/laboratory', json).then(res => {
+                idData = [];
+                lightyear.notify('禁用成功', 'success', 100);
+            }).catch(err => {
+                console.log(err.response);
+                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+            })
+        });
+    });
+</script>
+</body>
+</html>

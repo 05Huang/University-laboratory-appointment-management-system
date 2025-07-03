@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('首页')"/>
+</head>
+
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-calendar-check fs-22"></i></span>
+            <span class="fs-22 lh-22">134 件</span>
+          </div>
+          <div class="text-right">总借用设备</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-danger text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-clipboard-alert fs-22"></i></span>
+            <span class="fs-22 lh-22">34 件</span>
+          </div>
+          <div class="text-right">未归还设备</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-success text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i
+                class="mdi mdi-clipboard-arrow-left fs-22"></i></span>
+            <span class="fs-22 lh-22">12 间</span>
+          </div>
+          <div class="text-right">总预约实验室</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-purple text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-clipboard-account fs-22"></i></span>
+            <span class="fs-22 lh-22">1 间</span>
+          </div>
+          <div class="text-right">未归还</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 col-md-6">
+      <div class="card">
+        <div class="card-header"><h4>设备借用信息</h4></div>
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-success m-r-5" href="#!" id="backBtn1"><i class="mdi mdi-keyboard-backspace"></i>
+              一键归还</a>
+            <a class="btn btn-warning m-r-5" href="#!" id="cancelBtn1"><i class="mdi mdi-cancel"></i> 一键取消</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!--            表格数据-->
+            <table id="table1"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-lg-6 col-md-6">
+      <div class="card">
+        <div class="card-header"><h4>实验室预约信息</h4></div>
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-success m-r-5" href="#!" id="backBtn2"><i class="mdi mdi-keyboard-backspace"></i>
+              一键归还</a>
+            <a class="btn btn-warning m-r-5" href="#!" id="cancelBtn2"><i class="mdi mdi-cancel"></i> 一键取消</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!--            表格数据-->
+            <table id="table2"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<th:block th:include="include :: table"/>
+<script th:inline="javascript" type="text/javascript">
+    $(function () {
+        const idData = [];
+        const userId = [[${userId}]];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table1').bootstrapTable({
+            url: '/api/borrow/instrument/' + userId,                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号',
+                width: 50
+            }, {
+                field: 'instrumentName',
+                title: '设备名'
+            }, {
+                field: 'borrowStatus',
+                title: '借用状态',
+                formatter: function (value, row, index) {
+                    if (row.borrowStatus === '3') {
+                        return '<span class="label label-success">已取消</span>'
+                    }
+                    if (row.borrowStatus === '4') {
+                        return '<span class="label label-danger">被驳回</span>'
+                    }
+                    if (row.borrowStatus === '5') {
+                        return '<span class="label label-warning">审核中</span>'
+                    }
+                    return '<span class="label label-success">审核通过</span>';
+                }
+            }, {
+                field: 'comment',
+                title: '备注',
+            }, {
+                field: 'createTime',
+                title: '发起时间'
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #enable': function (e, value, row, index) {
+                        if (row.borrowStatus === '3') {
+                            lightyear.notify('该设备已取消，无法归还', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '4') {
+                            lightyear.notify('该设备已被驳回', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '5') {
+                            lightyear.notify('该设备还在审核中', 'danger', 100);
+                            return;
+                        }
+                        let data = {};
+                        data.status = '8';
+                        data.id = row.id;
+
+                        axios.patch('/auth/instrument/' + row.id, data)
+                            .then(res => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            $('#exampleModal').modal('hide');
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    },
+                    'click #disable': function (e, value, row, index) {
+                        if (row.borrowStatus === '3') {
+                            lightyear.notify('该设备已取消过了', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '7') {
+                            lightyear.notify('该设备已经在使用中了', 'danger', 100);
+                            return;
+                        }
+
+                        let data = {};
+                        data.comment = form.comment;
+                        data.status = '3';
+                        data.id = row.id;
+
+                        axios.patch('/auth/instrument/' + row.id, data)
+                            .then(res => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            $('#exampleModal').modal('hide');
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-purple btn-xs" href="#!" id="enable" title="归还"><i class="mdi mdi-keyboard-backspace"></i> 归还</a> ';
+                    result += '<a class="btn btn-brown btn-xs" href="#!" id="disable" title="取消"><i class="mdi mdi-cancel"></i>取消申请</a> ';
+                    return result;
+                }
+            }]
+        });
+        $('#table2').bootstrapTable({
+            url: '/api/borrow/laboratory/' + userId,                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号',
+                width: 50
+            }, {
+                field: 'laboratoryName',
+                title: '实验室名称'
+            }, {
+                field: 'borrowStatus',
+                title: '借用状态',
+                formatter: function (value, row, index) {
+                    if (row.borrowStatus === '3') {
+                        return '<span class="label label-success">已取消</span>'
+                    }
+                    if (row.borrowStatus === '4') {
+                        return '<span class="label label-danger">被驳回</span>'
+                    }
+                    if (row.borrowStatus === '5') {
+                        return '<span class="label label-warning">审核中</span>'
+                    }
+                    return '<span class="label label-success">审核通过</span>';
+                }
+            }, {
+                field: 'comment',
+                title: '备注',
+            }, {
+                field: 'createTime',
+                title: '发起时间'
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #enable': function (e, value, row, index) {
+                        if (row.borrowStatus === '3') {
+                            lightyear.notify('该设备已取消，无法归还', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '4') {
+                            lightyear.notify('该设备已被驳回', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '5') {
+                            lightyear.notify('该设备还在审核中', 'danger', 100);
+                            return;
+                        }
+                        let data = {};
+                        data.status = '8';
+                        data.id = row.id;
+
+                        axios.patch('/auth/laboratory/' + row.id, data)
+                            .then(res => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            $('#exampleModal').modal('hide');
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    },
+                    'click #disable': function (e, value, row, index) {
+                        if (row.borrowStatus === '3') {
+                            lightyear.notify('该设备已取消过了', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '7') {
+                            lightyear.notify('该设备已经在使用中了', 'danger', 100);
+                            return;
+                        }
+
+                        let data = {};
+                        data.comment = form.comment;
+                        data.status = '3';
+                        data.id = row.id;
+
+                        axios.patch('/auth/laboratory/' + row.id, data)
+                            .then(res => {
+                                $('#exampleModal').modal('hide');
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            $('#exampleModal').modal('hide');
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-purple btn-xs" href="#!" id="enable" title="归还"><i class="mdi mdi-keyboard-backspace"></i> 归还</a> ';
+                    result += '<a class="btn btn-brown btn-xs" href="#!" id="disable" title="取消"><i class="mdi mdi-cancel"></i>取消申请</a> ';
+                    return result;
+                }
+            }]
+        });
+
+    });
+</script>
+</body>
+</html>

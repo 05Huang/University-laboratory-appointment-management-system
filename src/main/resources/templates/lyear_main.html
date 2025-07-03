@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('首页')"/>
+</head>
+
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-primary text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-calendar-check fs-22"></i></span>
+            <span class="fs-22 lh-22" th:text="${countAll}+ 件">34 件</span>
+          </div>
+          <div class="text-right">总借出</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-danger text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-clipboard-alert fs-22"></i></span>
+            <span class="fs-22 lh-22" th:text="${countStatus}+ 件">30 件</span>
+          </div>
+          <div class="text-right">未归还</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-success text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i
+                class="mdi mdi-clipboard-arrow-left fs-22"></i></span>
+            <span class="fs-22 lh-22">1 条</span>
+          </div>
+          <div class="text-right">借用审核</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-xl-3">
+      <div class="card bg-purple text-white">
+        <div class="card-body clearfix">
+          <div class="flex-box">
+            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-clipboard-account fs-22"></i></span>
+            <span class="fs-22 lh-22">3 条</span>
+          </div>
+          <div class="text-right">预约审核</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">每周申请</div>
+        </div>
+        <div class="card-body">
+          <canvas class="js-chartjs-bars"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">审核历史记录</div>
+        </div>
+        <div class="card-body">
+          <canvas class="js-chartjs-lines"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<th:block th:include="include :: footer"/>
+<script type="text/javascript" th:src="@{/js/Chart.min.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+
+    const countApply = [[${countApply}]]
+    $(document).ready(function (e) {
+        let $dashChartBarsCnt = jQuery('.js-chartjs-bars')[0].getContext('2d'),
+            $dashChartLinesCnt = jQuery('.js-chartjs-lines')[0].getContext('2d');
+
+        let $dashChartBarsData = {
+            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+            datasets: [
+                {
+                    label: '申请数量',
+                    borderWidth: 1,
+                    borderColor: 'rgba(0, 0, 0, 0)',
+                    backgroundColor: 'rgba(51, 202, 185, 0.5)',
+                    hoverBackgroundColor: "rgba(51, 202, 185, 0.7)",
+                    hoverBorderColor: "rgba(0, 0, 0, 0)",
+                    data: [countApply, 6, 0, 0, 0, 0, 0]
+                }
+            ]
+        };
+        let $dashChartLinesData = {
+            labels: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+            datasets: [
+                {
+                    label: '审核数量',
+                    data: [4, countApply, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    borderColor: '#358ed7',
+                    backgroundColor: 'rgba(53, 142, 215, 0.175)',
+                    borderWidth: 1,
+                    fill: false,
+                    lineTension: 0.5
+                }
+            ]
+        };
+
+        new Chart($dashChartBarsCnt, {
+            type: 'bar',
+            data: $dashChartBarsData
+        });
+
+        var myLineChart = new Chart($dashChartLinesCnt, {
+            type: 'line',
+            data: $dashChartLinesData,
+        });
+    });
+</script>
+</body>
+</html>

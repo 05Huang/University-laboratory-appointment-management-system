@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('实验室信息')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
+</head>
+<body>
+<div class="container-fluid p-t-15">
+  <div class="modal fade" id="addUseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+              aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title" id="addUseLabel">新增用途</h4>
+        </div>
+        <div class="modal-body">
+          <form id="addUseForm">
+            <div class="form-group">
+              <label for="instrumentId" class="control-label">设备id：</label>
+              <input type="text" name="instrumentId" id="instrumentId" class="form-control" disabled="disabled">
+            </div>
+            <div class="form-group">
+              <label for="useTitle" class="control-label">用途名称：</label>
+              <input type="text" name="useTitle" id="useTitle" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="example-select">类别：</label>
+              <div>
+                <select class="form-control" id="example-select" name="type" size="1">
+                  <option th:each="type : ${types}" th:value="${type.type}" th:text="${type.value}">test
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="useDesc">用途描述</label>
+              <textarea class="form-control" id="useDesc" name="useDesc" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="comment">备注</label>
+              <textarea class="form-control" id="comment" name="comment" rows="5" value=""
+                        placeholder="描述"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" id="sureUseBtn" class="btn btn-primary">确定</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-toolbar clearfix">
+          <div class="toolbar-btn-action">
+            <a class="btn btn-danger" href="#!" id="delBtn"><i class="mdi mdi-window-close"></i> 删除</a>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <!-- 表格数据 -->
+            <table id="table"></table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div th:include="include :: table"></div>
+<script type="text/javascript">
+    $(function () {
+        var idData = [];
+
+        function contains(id) {
+            for (let datum of idData) {
+                if (datum === id) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        function getStatusJson(status, ids) {
+            let data = {};
+            data.status = status;
+            data.ids = ids;
+            return data
+        }
+
+        $('#table').bootstrapTable({
+            url: '/api/use',                                     // 通过url 获取数据
+            showRefresh: true,                                    // 是否刷新按钮
+            sortStable: true,                                      // 是否支持排序
+            cache: false,                                          // 是否使用缓存
+            pagination: true,                                      // 是否显示分页
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,                                         // 是否有搜索框
+            pageNumber: 1,                                         // 首页页码，默认为1
+            pageSize: 10,
+            pageList: [10, 20, 30],//可选择单页记录数
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true,
+            }, {
+                field: 'id',
+                align: 'center',
+                valign: 'middle',
+                title: '编号'
+            }, {
+                field: 'instrumentName',
+                title: '设备名'
+            }, {
+                field: 'useTitle',
+                title: '用途名称'
+            }, {
+                field: 'useDesc',
+                title: '用途描述'
+            }, {
+                field: 'type',
+                title: '类别'
+            }, {
+                field: 'createTime',
+                title: '创建时间'
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #edit': function (e, value, row, index) {
+                        $('#addUseModal').on('show.bs.modal', function (event) {
+                            var modal = $(this)
+                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
+                            modal.find('#instrumentId').val(row.id)
+                        })
+                        $('#addUseModal').modal();
+                        $('#sureUseBtn').click(() => {
+                            let form = $("#addUseForm").serializeObject();
+                            form['instrumentId'] = row.id;
+                            console.log(form);
+                            axios.put('/api/use', form).then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                                $('#addUseModal').modal('hide');
+                            }).catch(err => {
+                                lightyear.notify(err.response.data.message, 'danger', 100);
+                            })
+                        });
+                    },
+                    'click #delete': function (e, value, row, index) {
+                        axios.delete('/api/use/' + row.id)
+                            .then(res => {
+                                lightyear.notify(res.data, 'success', 100);
+                            }).catch(err => {
+                            lightyear.notify(err.response, 'danger', 100);
+                        });
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑" ><i class="mdi mdi-pencil"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="delete" href="#!" title="删除"><i class="mdi mdi-window-close"></i></a>';
+                    return result;
+                }
+            }]
+        })
+        $('#delBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要删除的数据', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/use',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('删除成功', 'success', 100);
+            }).catch(err => {
+                lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+            });
+        })
+
+    });
+</script>
+</body>
+</html>
