@@ -100,18 +100,19 @@
             return data
         }
 
+        // 初始化表格
         $('#table').bootstrapTable({
-            url: '/api/position',                                     // 通过url 获取数据
-            showRefresh: true,                                    // 是否刷新按钮
-            sortStable: true,                                      // 是否支持排序
-            cache: false,                                          // 是否使用缓存
-            pagination: true,                                      // 是否显示分页
+            url: '/api/position',
+            showRefresh: true,
+            sortStable: true,
+            cache: false,
+            pagination: true,
             sidePagination: 'client',
             searchAlign: 'right',
-            search: true,                                         // 是否有搜索框
-            pageNumber: 1,                                         // 首页页码，默认为1
+            search: true,
+            pageNumber: 1,
             pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
+            pageList: [10, 20, 30],
             onCheck: function (row) {
                 if (contains(row.id)) {
                     idData.push(row.id);
@@ -170,28 +171,18 @@
                 width: 200,
                 events: {
                     'click #edit': function (e, value, row, index) {
-                        $('#addPositionModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
-                            modal.find('#instrumentId').val(row.id)
-                        })
                         $('#addPositionModal').modal();
-                        $('#surePositionBtn').click(() => {
-                            let form = $("#addPositionForm").serializeObject();
-                            form['instrumentId'] = row.id;
-                            console.log(form);
-                            axios.put('/api/position', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#addPositionModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        });
+                        $('.modal-title').text('编辑：' + row.instrumentName);
+                        $('#instrumentId').val(row.id);
+                        $('#position').val(row.position);
+                        $('#detailNumber').val(row.detailNumber);
+                        $('#comment').val(row.comment);
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/position/' + row.id)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -204,11 +195,29 @@
                     return result;
                 }
             }]
-        })
+        });
 
-        $('#delBtn').click(() => {
+        // 初始化模态框事件
+        $('#addPositionModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
+
+        $('#surePositionBtn').off('click').on('click', function() {
+            let form = $("#addPositionForm").serializeObject();
+            form['instrumentId'] = $('#instrumentId').val();
+            console.log(form);
+            axios.put('/api/position', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addPositionModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
+
+        $('#delBtn').off('click').on('click', function() {
             if (idData.length === 0) {
-                lightyear.notify('请先选择要删除的用户', 'warning', 100);
+                lightyear.notify('请先选择要删除的位置', 'warning', 100);
                 return;
             }
             axios({
@@ -218,11 +227,11 @@
             }).then(res => {
                 idData = [];
                 lightyear.notify('删除成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
             }).catch(err => {
                 lightyear.notify('删除失败' + err.response.message, 'danger', 100);
             });
-        })
-
+        });
     });
 </script>
 </body>

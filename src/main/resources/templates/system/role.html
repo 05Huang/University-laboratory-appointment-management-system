@@ -154,18 +154,19 @@
             return data
         }
 
+        // 初始化表格
         $('#table').bootstrapTable({
-            url: '/api/sysRole',                                     // 通过url 获取数据
-            showRefresh: true,                                    // 是否刷新按钮
-            sortStable: true,                                      // 是否支持排序
-            cache: false,                                          // 是否使用缓存
-            pagination: true,                                      // 是否显示分页
+            url: '/api/sysRole',
+            showRefresh: true,
+            sortStable: true,
+            cache: false,
+            pagination: true,
             sidePagination: 'client',
             searchAlign: 'right',
-            search: true,                                         // 是否有搜索框
-            pageNumber: 1,                                         // 首页页码，默认为1
+            search: true,
+            pageNumber: 1,
             pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
+            pageList: [10, 20, 30],
             onCheck: function (row) {
                 if (contains(row.roleId)) {
                     idData.push(row.roleId);
@@ -221,33 +222,19 @@
                 width: 200,
                 events: {
                     'click #edit': function (e, value, row, index) {
-                        $('#exampleModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.roleName);
-                            modal.find('#uRoleId').val(row.roleId)
-                            modal.find('#uRoleName').val(row.roleName)
-                            modal.find('#uRoleKey').val(row.roleKey)
-                            modal.find('#uRoleSort').val(row.roleSort)
-                            modal.find('#status').val(row.status)
-                        })
                         $('#exampleModal').modal();
-                        $('#updateBtn').click(() => {
-                            let form = $("#updateForm").serializeObject();
-                            form['roleId'] = row.roleId;
-                            form['loginName'] = row.loginName;
-                            console.log(form);
-                            axios.put('/api/sysRole', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#exampleModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        })
+                        $('.modal-title').text('编辑：' + row.roleName);
+                        $('#uRoleId').val(row.roleId);
+                        $('#uRoleName').val(row.roleName);
+                        $('#uRoleKey').val(row.roleKey);
+                        $('#uRoleSort').val(row.roleSort);
+                        $('#status').val(row.status);
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/sysRole/' + row.roleId)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -261,76 +248,98 @@
                     return result;
                 }
             }]
-        }),
+        });
 
-            $('#addBtn').click(() => {
-                $('#addModal').on('show.bs.modal', function (event) {
-                    var modal = $(this)
-                    modal.find('.modal-title').text('新增角色');
-                })
+        // 初始化模态框事件
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
 
-                $('#addModal').modal();
-                $('#sureBtn').click(() => {
-                    let form = $("#addForm").serializeObject();
-                    console.log(form);
-                    axios.post('/api/sysRole', form).then(res => {
-                        lightyear.notify(res.data, 'success', 100);
-                        $('#addModal').modal('hide');
-                    }).catch(err => {
-                        lightyear.notify(err.response.data.message, 'danger', 100);
-                    })
-                })
-            }),
+        $('#updateBtn').off('click').on('click', function() {
+            let form = $("#updateForm").serializeObject();
+            form['roleId'] = $('#uRoleId').val();
+            console.log(form);
+            axios.put('/api/sysRole', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#exampleModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
 
-            $('#enableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
+        $('#addModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+            modal.find('.modal-title').text('新增角色');
+        });
 
-                let json = getStatusJson('0', idData);
-                axios.patch('/api/sysRole', json).then(res => {
-                    idData = [];
-                    lightyear.notify('启用成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
+        $('#addBtn').off('click').on('click', function() {
+            $('#addModal').modal();
+        });
 
-            $('#disableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
+        $('#sureBtn').off('click').on('click', function() {
+            let form = $("#addForm").serializeObject();
+            console.log(form);
+            axios.post('/api/sysRole', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
 
-                let json = getStatusJson('1', idData);
-                console.log(json);
-                axios.patch('/api/sysRole', json).then(res => {
-                    idData = [];
-                    lightyear.notify('禁用成功', 'success', 100);
-                }).catch(err => {
-                    console.log(err.response);
-                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
+        $('#enableBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用的角色', 'warning', 100);
+                return;
+            }
 
-            $('#delBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
-                    return;
-                }
-                axios({
-                    method: 'delete',
-                    url: '/api/sysRole',
-                    data: idData
-                }).then(res => {
-                    idData = [];
-                    lightyear.notify('删除成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
-                });
-            })
+            let json = getStatusJson('0', idData);
+            axios.patch('/api/sysRole', json).then(res => {
+                idData = [];
+                lightyear.notify('启用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
+            });
+        });
 
+        $('#disableBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要禁用的角色', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('1', idData);
+            console.log(json);
+            axios.patch('/api/sysRole', json).then(res => {
+                idData = [];
+                lightyear.notify('禁用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                console.log(err.response);
+                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+            });
+        });
+
+        $('#delBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要删除的角色', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/sysRole',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('删除成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+            });
+        });
     });
 </script>
 </body>

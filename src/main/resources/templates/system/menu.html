@@ -264,35 +264,21 @@
                 events: {
                     'click #edit': function (e, value, row, index) {
                         console.log(row);
-                        $('#exampleModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.menuName);
-                            modal.find('#umenuId').val(row.menuId)
-                            modal.find('#uparenId').val(row.parentId)
-                            modal.find('#umenuName').val(row.menuName)
-                            modal.find('#uorderNum').val(row.orderNum)
-                            modal.find('#url').val(row.url)
-                            modal.find('#uicon').val(row.icon)
-                            modal.find('#uremark').val(row.remark)
-                        })
                         $('#exampleModal').modal();
-                        $('#updateBtn').click(() => {
-                            let form = $("#updateForm").serializeObject();
-                            form['menuId'] = row.menuId;
-                            form['loginName'] = row.loginName;
-                            console.log(form);
-                            axios.put('/api/sysMenu', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#exampleModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        })
+                        $('.modal-title').text('编辑：' + row.menuName);
+                        $('#umenuId').val(row.menuId);
+                        $('#uparentId').val(row.parentId);
+                        $('#umenuName').val(row.menuName);
+                        $('#uorderNum').val(row.orderNum);
+                        $('#url').val(row.url);
+                        $('#uicon').val(row.icon);
+                        $('#uremark').val(row.remark);
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/sysMenu/' + row.menuId)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -306,76 +292,97 @@
                     return result;
                 }
             }]
-        }),
+        });
 
-            $('#addBtn').click(() => {
-                $('#addModal').on('show.bs.modal', function (event) {
-                    var modal = $(this)
-                    modal.find('.modal-title').text('新增用户');
-                })
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
 
-                $('#addModal').modal();
-                $('#sureBtn').click(() => {
-                    let form = $("#addForm").serializeObject();
-                    console.log(form);
-                    axios.post('/api/sysMenu', form).then(res => {
-                        lightyear.notify(res.data, 'success', 100);
-                        $('#addModal').modal('hide');
-                    }).catch(err => {
-                        lightyear.notify(err.response.data.message, 'danger', 100);
-                    })
-                })
-            }),
+        $('#updateBtn').off('click').on('click', function() {
+            let form = $("#updateForm").serializeObject();
+            form['menuId'] = $('#umenuId').val();
+            console.log(form);
+            axios.put('/api/sysMenu', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#exampleModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
 
-            $('#enableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
+        $('#addModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+            modal.find('.modal-title').text('新增菜单');
+        });
 
-                let json = getStatusJson('0', idData);
-                axios.patch('/api/sysMenu', json).then(res => {
-                    idData = [];
-                    lightyear.notify('启用成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
+        $('#addBtn').off('click').on('click', function() {
+            $('#addModal').modal();
+        });
 
-            $('#disableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
+        $('#sureBtn').off('click').on('click', function() {
+            let form = $("#addForm").serializeObject();
+            console.log(form);
+            axios.post('/api/sysMenu', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
 
-                let json = getStatusJson('1', idData);
-                console.log(json);
-                axios.patch('/api/sysMenu', json).then(res => {
-                    idData = [];
-                    lightyear.notify('禁用成功', 'success', 100);
-                }).catch(err => {
-                    console.log(err.response);
-                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
+        $('#enableBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用的菜单', 'warning', 100);
+                return;
+            }
 
-            $('#delBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
-                    return;
-                }
-                axios({
-                    method: 'delete',
-                    url: '/api/sysMenu',
-                    data: idData
-                }).then(res => {
-                    idData = [];
-                    lightyear.notify('删除成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
-                });
-            })
+            let json = getStatusJson('0', idData);
+            axios.patch('/api/sysMenu', json).then(res => {
+                idData = [];
+                lightyear.notify('启用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
+            });
+        });
 
+        $('#disableBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要禁用的菜单', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('1', idData);
+            console.log(json);
+            axios.patch('/api/sysMenu', json).then(res => {
+                idData = [];
+                lightyear.notify('禁用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                console.log(err.response);
+                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+            });
+        });
+
+        $('#delBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要删除的菜单', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/sysMenu',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('删除成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+            });
+        });
     });
 </script>
 </body>

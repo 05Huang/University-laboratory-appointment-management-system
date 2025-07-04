@@ -2,31 +2,140 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
   <th:block th:include="include :: header('首页')"/>
+  <style>
+    .dashboard-card {
+      border: none;
+      border-radius: 15px;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .dashboard-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard-card .card-body {
+      padding: 25px;
+    }
+
+    .flex-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .stat-icon {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      margin-right: 20px;
+    }
+
+    .stat-icon i {
+      font-size: 28px;
+      color: #fff;
+    }
+
+    .stat-content {
+      flex: 1;
+    }
+
+    .stat-number {
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0;
+      line-height: 1.2;
+      color: #fff;
+    }
+
+    .stat-label {
+      font-size: 16px;
+      opacity: 0.9;
+      margin: 5px 0 0;
+      color: #fff;
+    }
+
+    .bg-gradient-primary {
+      background: linear-gradient(45deg, #4099ff, #73b4ff);
+    }
+
+    .bg-gradient-danger {
+      background: linear-gradient(45deg, #ff5370, #ff869a);
+    }
+
+    .card-row {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+
+    .card-column {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    @media (max-width: 767px) {
+      .dashboard-card .card-body {
+        padding: 15px;
+      }
+      
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+      }
+      
+      .stat-icon i {
+        font-size: 24px;
+      }
+      
+      .stat-number {
+        font-size: 24px;
+      }
+      
+      .stat-label {
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 <div class="container-fluid p-t-15">
-  <div class="row">
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-primary text-white">
-        <div class="card-body clearfix">
+  <div class="row card-row">
+    <div class="col-md-6 col-xl-3 card-column">
+      <div class="card dashboard-card bg-gradient-primary text-white">
+        <div class="card-body">
           <div class="flex-box">
-            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-calendar-check fs-22"></i></span>
-            <span class="fs-22 lh-22">2 件</span>
+            <div class="stat-icon">
+              <i class="mdi mdi-calendar-check"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">2 件</h3>
+              <p class="stat-label">总借用设备</p>
+            </div>
           </div>
-          <div class="text-right">总借用设备</div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6 col-xl-3">
-      <div class="card bg-danger text-white">
-        <div class="card-body clearfix">
+    <div class="col-md-6 col-xl-3 card-column">
+      <div class="card dashboard-card bg-gradient-danger text-white">
+        <div class="card-body">
           <div class="flex-box">
-            <span class="img-avatar img-avatar-48 bg-translucent"><i class="mdi mdi-clipboard-alert fs-22"></i></span>
-            <span class="fs-22 lh-22">1 件</span>
+            <div class="stat-icon">
+              <i class="mdi mdi-clipboard-alert"></i>
+            </div>
+            <div class="stat-content">
+              <h3 class="stat-number">1 件</h3>
+              <p class="stat-label">未归还设备</p>
+            </div>
           </div>
-          <div class="text-right">未归还设备</div>
         </div>
       </div>
     </div>

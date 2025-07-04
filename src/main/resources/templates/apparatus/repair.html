@@ -139,6 +139,7 @@
                         axios.delete('/api/repair/' + row.id)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -148,34 +149,33 @@
                     return '<a class="btn btn-xs btn-default" id="delete" href="#!" title="维修完成"><i class="mdi mdi-check"></i></a>';
                 }
             }]
-        }),
+        });
 
-            $('#addBtn').click(() => {
-                parent.$(parent.document).data('multitabs').create({
-                    iframe: true,                                // 指定为iframe模式，当值为false的时候，为智能模式，自动判断（内网用ajax，外网用iframe）。缺省为false。
-                    title: '新增维修单',                     // 标题（可选），没有则显示网址
-                    url: '/apparatus/import'                    // 链接（必须），如为外链，强制为info页
-                }, true);
-            }),
+        $('#addBtn').off('click').on('click', function() {
+            parent.$(parent.document).data('multitabs').create({
+                iframe: true,
+                title: '新增维修单',
+                url: '/apparatus/import'
+            }, true);
+        });
 
-
-            $('#delBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
-                    return;
-                }
-                axios({
-                    method: 'delete',
-                    url: '/api/repair',
-                    data: idData
-                }).then(res => {
-                    idData = [];
-                    lightyear.notify('成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
-                });
-            })
-
+        $('#delBtn').off('click').on('click', function() {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要完成的维修单', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/repair',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('维修完成', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('操作失败' + err.response.message, 'danger', 100);
+            });
+        });
     });
 </script>
 </body>
