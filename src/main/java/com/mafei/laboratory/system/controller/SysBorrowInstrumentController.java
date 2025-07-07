@@ -34,6 +34,7 @@ public class SysBorrowInstrumentController {
 
     @PostMapping
     public ResponseEntity<Object> insert(@RequestBody BorrowInstrumentVo vo) {
+        System.out.println(vo.getUserId());
         instrumentService.insert(vo);
         return ResponseEntity.ok("success");
     }
