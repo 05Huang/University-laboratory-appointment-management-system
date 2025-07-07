@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>智能门禁系统</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/css/animate.min.css" rel="stylesheet"/>
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        
+        .door-container {
+            width: 1000px;
+            height: 600px;
+            margin: 20px auto;
+            position: relative;
+            background: linear-gradient(135deg, #fff 0%, #f5f7fa 100%);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* 墙壁效果 */
+        .wall {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(90deg, 
+                    rgba(0,0,0,0.03) 1px, 
+                    transparent 1px
+                ),
+                linear-gradient(0deg, 
+                    rgba(0,0,0,0.03) 1px, 
+                    transparent 1px
+                );
+            background-size: 20px 20px;
+        }
+
+        /* 门框效果 */
+        .door-frame {
+            position: absolute;
+            left: 350px;
+            top: 150px;
+            width: 120px;
+            height: 240px;
+            background: #2d3748;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        .door {
+            width: 110px;
+            height: 230px;
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+            position: absolute;
+            left: 5px;
+            top: 5px;
+            transform-origin: left;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 3px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .door::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            width: 8px;
+            height: 40px;
+            background: #718096;
+            border-radius: 4px;
+            transform: translateY(-50%);
+        }
+
+        .door.open {
+            transform: rotateY(-85deg);
+        }
+
+        /* 人物效果 */
+        .person {
+            width: 40px;
+            height: 80px;
+            position: absolute;
+            left: 280px;
+            top: 230px;
+            transition: all 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .person::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: #4299e1;
+            border-radius: 50%;
+            top: 0;
+        }
+
+        .person::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 40px;
+            background: #4299e1;
+            bottom: 0;
+            left: 5px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .person.enter {
+            left: 500px;
+            transform: scale(0.8);
+            opacity: 0.6;
+        }
+
+        /* 控制面板样式 */
+        .control-panel {
+            margin: 30px auto;
+            width: 1000px;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .status-panel {
+            margin: 20px auto;
+            width: 1000px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 状态文本样式 */
+        .status-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2d3748;
+            margin: 10px 0;
+        }
+
+        /* 门禁读卡器效果 */
+        .card-reader {
+            position: absolute;
+            left: 300px;
+            top: 250px;
+            width: 30px;
+            height: 45px;
+            background: #2d3748;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .card-reader::after {
+            content: '';
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #48bb78;
+            border-radius: 50%;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 地板效果 */
+        .floor {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(90deg, #e2e8f0 0%, #edf2f7 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="status-panel">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="status-text">
+                                门禁状态：<span id="doorStatus" class="badge badge-secondary">已关闭</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="status-text">
+                                授权状态：<span id="authStatus" class="badge badge-danger">未授权</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="door-container">
+                    <div class="wall"></div>
+                    <div class="floor"></div>
+                    <div class="card-reader"></div>
+                    <div class="door-frame">
+                        <div class="door"></div>
+                    </div>
+                    <div class="person"></div>
+                </div>
+                
+                <div class="control-panel">
+                    <button class="btn btn-primary" id="btnSimulate">
+                        <i class="fa fa-id-card"></i> 模拟刷卡
+                    </button>
+                    <button class="btn btn-success" id="btnAuth">
+                        <i class="fa fa-check-circle"></i> 模拟授权
+                    </button>
+                    <button class="btn btn-warning" id="btnReset">
+                        <i class="fa fa-refresh"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/access/door-animation.js}"></script>
+    <!-- 添加Font Awesome图标 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
+</body>
+</html> 
