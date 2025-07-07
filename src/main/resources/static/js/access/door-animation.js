@@ -323,9 +323,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 failureModal.classList.remove('show');
                 setTimeout(() => {
                     failureModal.style.display = 'none';
-                    // 重新打开摄像头，继续识别
-                    faceRecognitionModal.style.display = 'flex';
-                    startCamera();
                 }, 500);
             }, 2000);
         }
