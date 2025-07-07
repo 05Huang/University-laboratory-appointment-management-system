@@ -187,7 +187,7 @@
         }
 
         $('#table').bootstrapTable({
-            url: '/api/user',                                     // 通过url 获取数据
+            url: '/api/laboratory/log',                           // 通过url 获取数据
             showRefresh: true,                                    // 是否刷新按钮
             sortStable: true,                                      // 是否支持排序
             cache: false,                                          // 是否使用缓存
@@ -197,168 +197,95 @@
             search: true,                                         // 是否有搜索框
             pageNumber: 1,                                         // 首页页码，默认为1
             pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
-            onCheck: function (row) {
-                if (contains(row.userId)) {
-                    idData.push(row.userId);
-                }
-                console.log(idData)
-            },
-            onUncheck: function (row) {
-                idData.forEach((item, index, arr) => {
-                    if (item === row.userId) {
-                        arr.splice(index, 1);
-                    }
-                })
-                console.log(idData);
-            },
-            onCheckAll: function (rows) {
-                idData.splice(0, idData.length);
-                for (let i = 0; i < rows.length; i++) {
-                    idData.push(rows[i].userId);
-                }
-                console.log(idData);
-            },
-            onUncheckAll: function (rows) {
-                idData.splice(0, idData.length);
-                console.log(idData)
-            },
+            pageList: [10, 20, 30],                               // 可选择单页记录数
             columns: [{
                 name: 'check',
                 align: 'center',
                 valign: 'middle',
                 checkbox: true,
             }, {
-                field: 'userId',
+                field: 'index',
+                title: '序号',
                 align: 'center',
-                valign: 'middle',
-                title: '编号'
-            }, {
-                field: 'loginName',
-                title: '账号'
-            }, {
-                field: 'userName',
-                title: '用户名'
-            }, {
-                field: 'email',
-                title: '邮箱'
-            }, {
-                field: 'phonenumber',
-                title: '手机号'
-            }, {
-                field: 'sex',
-                title: '性别'
-            }, {
-                field: 'status',
-                title: '状态'
-            }, {
-                field: 'operate',
-                title: '操作',
-                align: 'center',
-                valign: 'middle',
-                width: 200,
-                events: {
-                    'click #edit': function (e, value, row, index) {
-                        $('#exampleModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.userName);
-                            modal.find('#userId').val(row.userId)
-                            modal.find('#loginName').val(row.loginName)
-                            modal.find('#userName').val(row.userName)
-                            modal.find('#email').val(row.email)
-                            modal.find('#sex').val(row.sex)
-                            modal.find('#phonenumber').val(row.phonenumber)
-                            modal.find('#status').val(row.status)
-                        })
-                        $('#exampleModal').modal();
-                        $('#updateBtn').click(() => {
-                            let form = $("#updateForm").serializeObject();
-                            form['userId'] = row.userId;
-                            form['loginName'] = row.loginName;
-                            console.log(form);
-                            axios.put('/api/user', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#exampleModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        })
-                    },
-                    'click #delete': function (e, value, row, index) {
-                        axios.delete('/api/user/' + row.userId)
-                            .then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                            }).catch(err => {
-                            lightyear.notify(err.response, 'danger', 100);
-                        });
-                    }
-                },
                 formatter: function (value, row, index) {
-                    let result = "";
-                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑" ><i class="mdi mdi-pencil"></i></a>';
-                    result += '<a class="btn btn-xs btn-default" id="view" href="#!" title="查看" ><i class="mdi mdi-eye"></i></a>';
-                    result += '<a class="btn btn-xs btn-default" id="delete" href="#!" title="删除"><i class="mdi mdi-window-close"></i></a>';
-                    return result;
+                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
+                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
+                    return pageSize * (pageNumber - 1) + index + 1;
                 }
+            }, {
+                field: 'laboratoryName',
+                title: '实验室名称'
+            }, {
+                field: 'operateType',
+                title: '操作类型'
+            }, {
+                field: 'operateTime',
+                title: '操作时间'
+            }, {
+                field: 'operateBy',
+                title: '操作人'
+            }, {
+                field: 'remark',
+                title: '备注'
             }]
+        });
+
+        $('#addBtn').click(() => {
+            parent.$(parent.document).data('multitabs').create({
+                iframe: true,                                // 指定为iframe模式，当值为false的时候，为智能模式，自动判断（内网用ajax，外网用iframe）。缺省为false。
+                title: '信息导入',                     // 标题（可选），没有则显示网址
+                url: '/laboratory/import'                    // 链接（必须），如为外链，强制为info页
+            }, true);
         }),
 
-            $('#addBtn').click(() => {
-                parent.$(parent.document).data('multitabs').create({
-                    iframe: true,                                // 指定为iframe模式，当值为false的时候，为智能模式，自动判断（内网用ajax，外网用iframe）。缺省为false。
-                    title: '信息导入',                     // 标题（可选），没有则显示网址
-                    url: '/laboratory/import'                    // 链接（必须），如为外链，强制为info页
-                }, true);
-            }),
+        $('#enableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用的用户', 'warning', 100);
+                return;
+            }
 
-            $('#enableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
-
-                let json = getStatusJson('0', idData);
-                axios.patch('/api/user', json).then(res => {
-                    idData = [];
-                    lightyear.notify('启用成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
-
-            $('#disableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的用户', 'warning', 100);
-                    return;
-                }
-
-                let json = getStatusJson('1', idData);
-                console.log(json);
-                axios.patch('/api/user', json).then(res => {
-                    idData = [];
-                    lightyear.notify('禁用成功', 'success', 100);
-                }).catch(err => {
-                    console.log(err.response);
-                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
-
-            $('#delBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
-                    return;
-                }
-                axios({
-                    method: 'delete',
-                    url: '/api/user',
-                    data: idData
-                }).then(res => {
-                    idData = [];
-                    lightyear.notify('删除成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
-                });
+            let json = getStatusJson('0', idData);
+            axios.patch('/api/user', json).then(res => {
+                idData = [];
+                lightyear.notify('启用成功', 'success', 100);
+            }).catch(err => {
+                lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
             })
+        }),
+
+        $('#disableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用的用户', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('1', idData);
+            console.log(json);
+            axios.patch('/api/user', json).then(res => {
+                idData = [];
+                lightyear.notify('禁用成功', 'success', 100);
+            }).catch(err => {
+                console.log(err.response);
+                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+            })
+        }),
+
+        $('#delBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要删除的用户', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/user',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('删除成功', 'success', 100);
+            }).catch(err => {
+                lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+            });
+        })
 
     });
 </script>

@@ -54,10 +54,14 @@
             pageSize: 10,
             pageList: [10, 20, 30],//可选择单页记录数
             columns: [{
-                field: 'id',
+                field: 'index',
+                title: '序号',
                 align: 'center',
-                valign: 'middle',
-                title: '编号'
+                formatter: function (value, row, index) {
+                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
+                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
+                    return pageSize * (pageNumber - 1) + index + 1;
+                }
             }, {
                 field: 'userName',
                 title: '用户名'

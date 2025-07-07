@@ -142,12 +142,16 @@
                 name: 'check',
                 align: 'center',
                 valign: 'middle',
-                checkbox: true,
+                checkbox: true
             }, {
-                field: 'id',
+                field: 'index',
+                title: '序号',
                 align: 'center',
-                valign: 'middle',
-                title: '编号'
+                formatter: function (value, row, index) {
+                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
+                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
+                    return pageSize * (pageNumber - 1) + index + 1;
+                }
             }, {
                 field: 'instrumentName',
                 title: '设备名'
