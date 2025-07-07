@@ -229,7 +229,11 @@
                 .then(res => {
                     $('#exampleModal').modal('hide');
                     lightyear.notify(res.data, 'success', 100);
-                    $('#table').bootstrapTable('refresh');
+                    setTimeout(function() {
+                        $('#table').bootstrapTable('refresh', {
+                            silent: true
+                        });
+                    }, 100);
                 }).catch(err => {
                     $('#exampleModal').modal('hide');
                     lightyear.notify(err.response, 'danger', 100);
@@ -246,8 +250,12 @@
             axios.patch('/auth/laboratory', json)
                 .then(res => {
                     lightyear.notify(res.data, 'success', 100);
-                    $('#table').bootstrapTable('refresh');
-                    idData = [];
+                    setTimeout(function() {
+                        $('#table').bootstrapTable('refresh', {
+                            silent: true
+                        });
+                        idData = [];
+                    }, 100);
                 }).catch(err => {
                     lightyear.notify(err.response, 'danger', 100);
                 });

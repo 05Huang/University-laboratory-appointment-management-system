@@ -88,20 +88,35 @@
 
         function uploadImg(element, tag) {
             let file = tag.files[0];
-            image = file.name;
-            let imgSrc;
             if (!/image\/\w+/.test(file.type)) {
-                alert("看清楚，这个需要图片！");
+                lightyear.notify('请选择图片文件！', 'warning', 100);
                 return false;
             }
-            let reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = function () {
-                imgSrc = this.result;
-                let imgs = document.createElement("img");
-                $(imgs).attr("src", imgSrc);
-                element.append(imgs);
-            };
+
+            // 创建FormData对象
+            let formData = new FormData();
+            formData.append('file', file);
+
+            // 上传文件
+            axios.post('/api/upload/image', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(res => {
+                // 保存返回的图片URL
+                image = res.data;
+                
+                // 预览图片
+                let reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = function () {
+                    let imgs = document.createElement("img");
+                    $(imgs).attr("src", this.result);
+                    element.empty().append(imgs);  // 清除之前的预览图
+                };
+            }).catch(err => {
+                lightyear.notify('图片上传失败：' + err.response.data, 'danger', 100);
+            });
         }
 
         $.fn.serializeObject = function () {
@@ -122,13 +137,17 @@
 
         $('#addBtn').click(() => {
             let form = $('#importData').serializeObject();
-            form['image'] = '/images/upload/' + image;
+            form['image'] = image;  // 直接使用上传后返回的URL
             if (form.depotId === '') {
                 lightyear.notify('请先选择组织', 'warning', 100);
                 return;
             }
             if (form.laboratoryName === '') {
                 lightyear.notify('必须填写实验室名称', 'warning', 100);
+                return;
+            }
+            if (!form.image) {
+                lightyear.notify('请上传实验室图片', 'warning', 100);
                 return;
             }
             console.log(form);
