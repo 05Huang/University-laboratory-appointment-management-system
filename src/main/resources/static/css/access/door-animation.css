@@ -1,0 +1,880 @@
+/* 全局样式 */
+:root {
+    --primary-color: #00a8ff;
+    --secondary-color: #0097e6;
+    --glow-color: rgba(0, 168, 255, 0.5);
+    --building-color: #2c3e50;
+    --window-color: rgba(0, 168, 255, 0.2);
+    --glass-color: rgba(135, 206, 235, 0.3);
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: #1a1a1a;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+}
+
+.scene {
+    width: 100vw;
+    height: 100vh;
+    perspective: 2000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #2c3e50 0%, #1a1a1a 100%);
+    position: relative;
+    overflow: hidden;
+    pointer-events: auto;
+}
+
+/* 建筑物样式 */
+.building {
+    width: 80vw;
+    max-width: 1200px;
+    height: 80vh;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: all 1.5s ease-in-out;
+    pointer-events: none;
+    margin-top: 100px;
+}
+
+.building-body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    pointer-events: none;
+}
+
+/* 屋顶样式 */
+.roof {
+    width: 100%;
+    height: 60px;
+    background: var(--building-color);
+    position: absolute;
+    top: -60px;
+    transform-style: preserve-3d;
+    border-radius: 5px 5px 0 0;
+}
+
+.roof-edge {
+    width: 102%;
+    height: 10px;
+    background: var(--primary-color);
+    position: absolute;
+    bottom: 0;
+    left: -1%;
+    box-shadow: 0 0 20px var(--glow-color);
+}
+
+.roof-detail {
+    width: 60%;
+    height: 30px;
+    background: linear-gradient(45deg, var(--building-color), var(--secondary-color));
+    position: absolute;
+    top: 10px;
+    left: 20%;
+    border-radius: 3px;
+}
+
+/* 主体外墙样式 */
+.building-facade {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--building-color), #34495e);
+    position: relative;
+    border-radius: 10px;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+/* 楼层样式 */
+.floor {
+    width: 100%;
+    height: 25%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.windows-row {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 100%;
+}
+
+.window {
+    width: 120px;
+    height: 80%;
+    background: var(--glass-color);
+    border: 2px solid var(--primary-color);
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.window::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.2),
+        transparent
+    );
+    animation: windowGlow 3s infinite;
+}
+
+/* 入口区域样式 */
+.entrance {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+    margin-top: 20px;
+}
+
+.entrance-frame {
+    position: relative;
+    width: 200px;
+    height: 100%;
+    pointer-events: none;
+    margin: 0 auto;
+    perspective: 1000px;
+    transform-style: preserve-3d;
+}
+
+/* 门样式 */
+.door {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, #2c3e50, #34495e);
+    pointer-events: none;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 15px var(--glow-color);
+    transform-origin: center;
+    transition: transform 1.5s ease-in-out;
+}
+
+.left-door {
+    left: 0;
+    border-right: none;
+    transform: rotateY(0deg);
+}
+
+.right-door {
+    right: 0;
+    border-left: none;
+    transform: rotateY(0deg);
+}
+
+.left-door.open {
+    transform: rotateY(60deg);
+}
+
+.right-door.open {
+    transform: rotateY(-60deg);
+}
+
+/* 门禁面板样式 */
+.access-panel {
+    position: fixed;
+    width: 250px;
+    height: 300px;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--primary-color);
+    z-index: 1000;
+}
+
+.access-panel:hover {
+    box-shadow: 0 0 30px var(--glow-color);
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+/* 按钮容器样式 */
+.button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    position: relative;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+/* 屏幕内容样式 */
+.screen-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    z-index: 12;
+}
+
+/* 面板屏幕样式 */
+.panel-screen {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* 扫描区域样式 */
+.face-scan-area {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(0, 168, 255, 0.1);
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 20px var(--glow-color);
+}
+
+#videoElement {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.scan-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.scan-frame {
+    width: 100%;
+    height: 100%;
+}
+
+.scan-border {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 2;
+    stroke-dasharray: 20 10;
+    animation: borderRotate 10s linear infinite;
+}
+
+.scan-line {
+    stroke: var(--primary-color);
+    stroke-width: 2;
+    animation: scanMove 2s ease-in-out infinite;
+}
+
+/* 按钮包装器 */
+.button-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    position: relative;
+    z-index: 1001;
+}
+
+/* 按钮样式 */
+.scan-button {
+    position: relative;
+    min-width: 150px;
+    padding: 15px 30px;
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    border-radius: 30px;
+    font-size: 16px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s ease;
+    z-index: 1002;
+}
+
+.scan-button:hover,
+.scan-button:focus {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--glow-color);
+}
+
+.scan-button:active {
+    transform: scale(0.95);
+}
+
+.button-text {
+    position: relative;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.button-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at center, var(--glow-color) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.scan-button:hover .button-glow,
+.scan-button:focus .button-glow {
+    opacity: 1;
+}
+
+/* 建筑装饰元素 */
+.building-pillars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    pointer-events: none;
+}
+
+.pillar {
+    position: absolute;
+    width: 40px;
+    height: 100%;
+    background: linear-gradient(to right, var(--building-color), var(--secondary-color));
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.pillar-left {
+    left: 0;
+}
+
+.pillar-right {
+    right: 0;
+}
+
+/* 成功提示框样式 */
+.success-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 3000; /* 确保在最上层 */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.success-modal .modal-content {
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 30px var(--glow-color);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.success-modal.show {
+    opacity: 1;
+    display: flex;
+}
+
+.success-modal.show .modal-content {
+    transform: scale(1);
+}
+
+.success-modal .success-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.success-modal .success-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.success-modal .success-circle {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    stroke-dasharray: 180;
+    stroke-dashoffset: 180;
+    animation: drawCircle 1s ease forwards;
+}
+
+.success-modal .success-check {
+    fill: none;
+    stroke: var(--primary-color);
+    stroke-width: 3;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawCheck 0.8s ease forwards 0.6s;
+}
+
+.success-modal h2 {
+    color: var(--primary-color);
+    margin: 0 0 10px;
+    font-size: 24px;
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+.success-modal p {
+    color: #fff;
+    margin: 0;
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+@keyframes drawCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes drawCheck {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* 动画关键帧 */
+@keyframes scanAnimation {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(90px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+@keyframes windowGlow {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* 验证按钮容器 */
+.verify-button-container {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+/* 科技感验证按钮 */
+.verify-button {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    padding: 0;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.button-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.button-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary-color);
+    border-radius: 50%;
+    animation: pulseCircle 2s infinite;
+    pointer-events: none;
+}
+
+.button-scan-line {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-color);
+    transform-origin: center;
+    animation: scanLine 2s infinite;
+    pointer-events: none;
+}
+
+.button-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60%;
+    height: 60%;
+    fill: var(--primary-color);
+    filter: drop-shadow(0 0 5px var(--glow-color));
+    pointer-events: none;
+}
+
+.verify-button .button-text {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--primary-color);
+    font-size: 16px;
+    white-space: nowrap;
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+/* 人脸识别弹出层 */
+.face-recognition-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.face-recognition-modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.face-recognition-modal .modal-content {
+    background: linear-gradient(45deg, #2c3e50, #34495e);
+    border-radius: 20px;
+    padding: 30px;
+    width: 90%;
+    max-width: 600px;
+    border: 2px solid var(--primary-color);
+    box-shadow: 0 0 30px var(--glow-color);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-header h2 {
+    color: var(--primary-color);
+    margin: 0;
+    font-size: 24px;
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+.close-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    width: 30px;
+    height: 30px;
+}
+
+.close-button svg {
+    width: 100%;
+    height: 100%;
+    fill: var(--primary-color);
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 动画关键帧 */
+@keyframes pulseCircle {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes scanLine {
+    0% {
+        transform: translateY(-50%) scaleX(0);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-50%) scaleX(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-50%) scaleX(0);
+        opacity: 0;
+    }
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    .building {
+        width: 90vw;
+    }
+    
+    .entrance {
+        width: 200px;
+        height: 300px;
+    }
+    
+    .access-panel {
+        width: 150px;
+        height: 250px;
+    }
+    
+    .window {
+        width: 80px;
+    }
+}
+
+/* 验证状态样式 */
+.verification-status {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.status-icon {
+    width: 40px;
+    height: 40px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.scanning-circle {
+    width: 100%;
+    height: 100%;
+    border: 3px solid var(--primary-color);
+    border-radius: 50%;
+    position: absolute;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.scanning-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    background: var(--primary-color);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: glow 1.5s ease-in-out infinite;
+}
+
+.status-text {
+    color: var(--primary-color);
+    font-size: 18px;
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0.5;
+    }
+}
+
+@keyframes glow {
+    0% {
+        opacity: 0.3;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes borderRotate {
+    to {
+        stroke-dashoffset: -60;
+    }
+}
+
+@keyframes scanMove {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(90px);
+    }
+}
+
+/* 建筑标题样式 */
+.building-title {
+    position: absolute;
+    top: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10;
+    width: 100%;
+}
+
+.title-text {
+    font-size: 36px;
+    color: var(--primary-color);
+    text-shadow: 0 0 15px var(--glow-color),
+                 0 0 30px var(--glow-color);
+    font-family: "Microsoft YaHei", sans-serif;
+    font-weight: bold;
+    letter-spacing: 4px;
+    opacity: 0;
+    animation: titleFadeIn 1s ease forwards 0.5s;
+    display: inline-block;
+    padding: 10px 30px;
+    background: linear-gradient(to right, 
+        transparent 0%,
+        rgba(44, 62, 80, 0.3) 20%,
+        rgba(44, 62, 80, 0.3) 80%,
+        transparent 100%
+    );
+    border-radius: 5px;
+}
+
+.title-underline {
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    margin: 10px auto 0;
+    position: relative;
+    animation: underlineExtend 1.5s ease forwards 1s;
+    box-shadow: 0 0 10px var(--glow-color);
+}
+
+.title-underline::before,
+.title-underline::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px var(--glow-color);
+    opacity: 0;
+    animation: dotAppear 0.5s ease forwards 2s;
+}
+
+.title-underline::before {
+    left: 0;
+}
+
+.title-underline::after {
+    right: 0;
+}
+
+@keyframes titleFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes underlineExtend {
+    from {
+        width: 0;
+    }
+    to {
+        width: 80%;
+    }
+}
+
+@keyframes dotAppear {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+} 
