@@ -61,7 +61,7 @@ public class SysLaboratory {
      * 状态（0正常 1停用）
      */
     @Column(name = "status")
-    private String status;
+    private String status= "0";
 
     /**
      * 照片
