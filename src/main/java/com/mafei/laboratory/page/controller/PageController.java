@@ -93,19 +93,29 @@ public class PageController {
             throw new BadRequestException(HttpStatus.FORBIDDEN, "token失效，请重新登录");
         }
 
+        // 总借出数量（实验室 + 仪器）
         long count = laboratoryService.countAll() + instrumentService.countAll();
+        // 未归还数量（状态7表示未归还）
         long countStatus = laboratoryService.countAllByStatus("7") + instrumentService.countAllByStatus("7");
+        // 待审核申请数量（状态5表示待审核）
         long countApply = laboratoryService.countAllByStatus("5") + instrumentService.countAllByStatus("5");
+        // 借用审核数量（状态1表示待审核）
+        long borrowApplyCount = laboratoryService.countAllByStatus("1") + instrumentService.countAllByStatus("1");
+        // 预约审核数量（状态2表示预约待审核）
+        long reserveCount = laboratoryService.countAllByStatus("2") + instrumentService.countAllByStatus("2");
 
         String token = cookie.getValue();
         Map<String, Object> map = JwtUtils.parseToken(token);
         Long userId = Long.valueOf(String.valueOf(map.get("userId")));
         long roleId = Long.parseLong(String.valueOf(map.get("roleId")));
+        
+        // 传递所有统计数据到前端
         model.addAttribute("userId", userId);
         model.addAttribute("countAll", count);
         model.addAttribute("countStatus", countStatus);
         model.addAttribute("countApply", countApply);
-
+        model.addAttribute("borrowApplyCount", borrowApplyCount);
+        model.addAttribute("reserveCount", reserveCount);
 
         if (roleId == 2) {
             return "teacher_main";

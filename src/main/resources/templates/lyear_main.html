@@ -2,6 +2,7 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
   <th:block th:include="include :: header('首页')"/>
+  <link th:href="@{/js/bootstrap-table/bootstrap-table.min.css}" rel="stylesheet"/>
   <style>
     .dashboard-card {
       border: none;
@@ -124,7 +125,7 @@
               <i class="mdi mdi-calendar-check"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number" th:text="${countAll}+ ' 件'">34 件</h3>
+              <h3 class="stat-number" data-stat="countAll" th:text="${countAll}+ ' 件'">0 件</h3>
               <p class="stat-label">总借出</p>
             </div>
           </div>
@@ -140,7 +141,7 @@
               <i class="mdi mdi-clipboard-alert"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number" th:text="${countStatus}+ ' 件'">30 件</h3>
+              <h3 class="stat-number" data-stat="countStatus" th:text="${countStatus}+ ' 件'">0 件</h3>
               <p class="stat-label">未归还</p>
             </div>
           </div>
@@ -156,7 +157,7 @@
               <i class="mdi mdi-clipboard-arrow-left"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number">1 条</h3>
+              <h3 class="stat-number" data-stat="borrowApplyCount" th:text="${borrowApplyCount}+ ' 条'">0 条</h3>
               <p class="stat-label">借用审核</p>
             </div>
           </div>
@@ -172,8 +173,8 @@
               <i class="mdi mdi-clipboard-account"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number">3 条</h3>
-              <p class="stat-label">预约审核</p>
+              <h3 class="stat-number" data-stat="reserveCount" th:text="${reserveCount}+ ' 条'">0 条</h3>
+              <p class="stat-label">维修中</p>
             </div>
           </div>
         </div>
@@ -209,11 +210,47 @@
 </div>
 
 <th:block th:include="include :: footer"/>
+<script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/axios-config.js}"></script>
 <script type="text/javascript" th:src="@{/js/Chart.min.js}"></script>
 <script type="text/javascript" th:inline="javascript">
+    // 获取最新的统计数据
+    function fetchDashboardStats() {
+        console.log('Fetching dashboard stats...');
+        axios.get('/api/dashboard/stats', {
+            headers: {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            }
+        })
+        .then(function(response) {
+            console.log('Received dashboard stats:', response.data);
+            if (response.data) {
+                // 更新卡片数据
+                document.querySelector('[data-stat="countAll"]').textContent = response.data.countAll + ' 件';
+                document.querySelector('[data-stat="countStatus"]').textContent = response.data.countStatus + ' 件';
+                document.querySelector('[data-stat="borrowApplyCount"]').textContent = response.data.borrowApplyCount + ' 条';
+                document.querySelector('[data-stat="reserveCount"]').textContent = response.data.reserveCount + ' 条';
+            }
+        })
+        .catch(function(error) {
+            console.error('获取统计数据失败:', error);
+        });
+    }
 
-    const countApply = [[${countApply}]]
-    $(document).ready(function (e) {
+    // 页面加载完成后启动自动刷新
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, starting auto-refresh...');
+        // 立即执行一次
+        fetchDashboardStats();
+        // 每30秒刷新一次
+        setInterval(fetchDashboardStats, 30000);
+    });
+
+    // 图表相关代码
+    const countApply = [[${countApply}]];
+    $(document).ready(function(e) {
         let $dashChartBarsCnt = jQuery('.js-chartjs-bars')[0].getContext('2d'),
             $dashChartLinesCnt = jQuery('.js-chartjs-lines')[0].getContext('2d');
 
