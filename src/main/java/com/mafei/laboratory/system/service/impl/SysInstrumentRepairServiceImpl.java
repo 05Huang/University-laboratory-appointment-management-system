@@ -37,8 +37,9 @@ public class SysInstrumentRepairServiceImpl implements SysInstrumentRepairServic
             RepairVo repairVo = new RepairVo();
             BeanUtils.copyProperties(use, repairVo);
             String name = repairRepository.getName(use.getId());
+            String image= instrumentRepository.getImage(use.getInstrumentId());
             repairVo.setInstrumentName(name);
-
+            repairVo.setImage(image);
             list.add(repairVo);
         }
         return list;

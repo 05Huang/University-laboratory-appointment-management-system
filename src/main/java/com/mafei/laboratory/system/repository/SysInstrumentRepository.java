@@ -88,4 +88,13 @@ public interface SysInstrumentRepository extends JpaRepository<SysInstrument, Lo
      */
     @Query(value = "select instrument_name from sys_instrument where id = ?1", nativeQuery = true)
     String getName(Long id);
+
+    /**
+     * 获取图片
+     *
+     * @param id
+     * @return
+     */
+    @Query(value = "select image from sys_instrument where id = ?1", nativeQuery = true)
+    String getImage(Long id);
 }

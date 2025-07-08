@@ -11,6 +11,11 @@ spring:
   devtools:
     restart:
       enabled: true
+  mvc:
+    static-path-pattern: /**
+  web:
+    resources:
+      static-locations: classpath:/static/,file:uploads/
 
   # 数据库配置
   datasource:

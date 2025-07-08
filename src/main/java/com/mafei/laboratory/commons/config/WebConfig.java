@@ -9,7 +9,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 配置图片上传目录的访问路径
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
         registry.addResourceHandler("/images/upload/**")
-                .addResourceLocations("file:D:/laboratory/upload/");  // 修改为你的实际上传目录
+                .addResourceLocations("file:D:/laboratory/upload/");
     }
 } 

@@ -13,4 +13,5 @@ public class Instrument {
     private Long instrumentId;
     private String instrumentName;
     private String comment;
+    private String image;  // 设备图片路径
 }
