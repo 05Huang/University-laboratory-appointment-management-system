@@ -42,7 +42,7 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
      * @param userId
      * @return
      */
-    @Query(value = "select distinct * from sys_borrow_instrument where user_id =?1 and borrow_status in ('3','4','5','7')" +
+    @Query(value = "select distinct * from sys_borrow_instrument where user_id =?1 and borrow_status in ('3','4','5','7','6','8')" +
             " order by borrow_status desc,create_time desc", nativeQuery = true)
     List<SysBorrowInstrument> findByUserId(Long userId);
 
@@ -54,7 +54,7 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowInstrumentVo( " +
             "a.id,a.userId,a.instrumentId,b.userName,c.instrumentName,a.status,a.borrowStatus,a.comment,a.createTime) " +
             " from SysBorrowInstrument as a,SysUser as b,SysInstrument as c " +
-            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5','8') " +
+            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5','8','6') " +
             " order by a.status,a.createTime desc")
     List<BorrowInstrumentVo> myFindAll();
 
@@ -66,7 +66,7 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowInstrumentVo( " +
             "a.id,a.userId,a.instrumentId,b.userName,c.instrumentName,a.status,a.borrowStatus,a.comment,a.createTime) " +
             " from SysBorrowInstrument as a,SysUser as b,SysInstrument as c " +
-            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5') " +
+            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5','6') " +
             " order by a.status,a.createTime desc")
     List<BorrowInstrumentVo> myFindAllReview();
 

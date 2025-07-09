@@ -1,5 +1,6 @@
 package com.mafei.laboratory.system.service.impl;
 
+import com.mafei.laboratory.commons.enums.StatusEnum;
 import com.mafei.laboratory.system.entity.SysInstrument;
 import com.mafei.laboratory.system.entity.vo.InstrumentVo;
 import com.mafei.laboratory.system.repository.SysBorrowInstrumentRepository;
@@ -57,7 +58,7 @@ public class SysInstrumentServiceImpl implements SysInstrumentService {
             sysInstrument.setInstrumentName(instrumentVo.getInstrumentName());
             sysInstrument.setModel(instrumentVo.getModel());
             sysInstrument.setType(instrumentVo.getType());
-            sysInstrument.setStatus(instrumentVo.getStatus());
+            sysInstrument.setStatus(StatusEnum.NORMAL.getStatus());
             sysInstrument.setPrice(instrumentVo.getPrice());
             sysInstrument.setCreateBy("admin");
             sysInstrument.setImage(instrumentVo.getImage());

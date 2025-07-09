@@ -21,6 +21,9 @@ public interface SysUserFaceRepository extends JpaRepository<SysUserFace, Long> 
      */
     void deleteByUserId(Long userId);
 
+    /**
+     * 查找所有激活的人脸信息
+     */
     @Query("SELECT f FROM SysUserFace f WHERE f.status = 1")
     List<SysUserFace> findAllActiveFaces();
 } 
