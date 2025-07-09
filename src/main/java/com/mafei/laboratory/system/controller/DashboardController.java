@@ -75,6 +75,26 @@ public class DashboardController {
     }
 
     /**
+     * 获取学生的统计数据
+     */
+    @GetMapping("/student/{userId}")
+    public ResponseEntity<Map<String, Object>> getStudentStats(@PathVariable("userId") Long userId) {
+        Map<String, Object> stats = new HashMap<>();
+        
+        // 计算学生的统计数据
+        // 总借用设备数量
+        long totalBorrowed = instrumentService.countAllByUserId(userId);
+        // 未归还的设备数量（状态码 7）
+        long notReturned = instrumentService.countAllByUserIdAndStatus(userId, StatusEnum.BORROW.getStatus());
+        
+        // 添加到返回结果
+        stats.put("totalBorrowed", totalBorrowed);
+        stats.put("notReturned", notReturned);
+        
+        return ResponseEntity.ok(stats);
+    }
+
+    /**
      * 获取本周每天的申请数量
      */
     @GetMapping("/weekly-stats")
