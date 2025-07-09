@@ -10,10 +10,11 @@ import com.mafei.laboratory.system.service.SysInstrumentRepairService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -23,7 +24,6 @@ import java.util.Set;
  * @since 2021-03-10 08:48:37
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SysInstrumentRepairServiceImpl implements SysInstrumentRepairService {
     private final SysInstrumentRepairRepository repairRepository;
@@ -37,7 +37,7 @@ public class SysInstrumentRepairServiceImpl implements SysInstrumentRepairServic
             RepairVo repairVo = new RepairVo();
             BeanUtils.copyProperties(use, repairVo);
             String name = repairRepository.getName(use.getId());
-            String image= instrumentRepository.getImage(use.getInstrumentId());
+            String image = instrumentRepository.getImage(use.getInstrumentId());
             repairVo.setInstrumentName(name);
             repairVo.setImage(image);
             list.add(repairVo);
@@ -52,54 +52,54 @@ public class SysInstrumentRepairServiceImpl implements SysInstrumentRepairServic
 
     @Override
     public SysInstrumentRepair queryById(Long id) {
-        return repairRepository.findById(id).get();
+        Optional<SysInstrumentRepair> repair = repairRepository.findById(id);
+        return repair.orElse(null);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insert(RepairVo repairVo) {
-        try {
-            SysInstrumentRepair instrumentRepair = new SysInstrumentRepair();
-            instrumentRepair.setId(repairVo.getId());
-            instrumentRepair.setInstrumentId(repairVo.getInstrumentId());
-            instrumentRepair.setPrice(repairVo.getPrice());
-            instrumentRepair.setRepairPosition(repairVo.getRepairPosition());
-            instrumentRepair.setComment(repairVo.getComment());
-            instrumentRepair.setCreateBy("admin");
-            instrumentRepair.setCreateTime(repairVo.getCreateTime());
-            instrumentRepair.setUpdateTime(repairVo.getUpdateTime());
-            repairRepository.save(instrumentRepair);
-            instrumentRepository.updateStatus(repairVo.getInstrumentId(), StatusEnum.REPAIR.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SysInstrumentRepair instrumentRepair = new SysInstrumentRepair();
+        instrumentRepair.setId(repairVo.getId());
+        instrumentRepair.setInstrumentId(repairVo.getInstrumentId());
+        instrumentRepair.setPrice(repairVo.getPrice());
+        instrumentRepair.setRepairPosition(repairVo.getRepairPosition());
+        instrumentRepair.setComment(repairVo.getComment());
+        instrumentRepair.setCreateBy("admin");
+        instrumentRepair.setCreateTime(repairVo.getCreateTime());
+        instrumentRepair.setUpdateTime(repairVo.getUpdateTime());
+        repairRepository.save(instrumentRepair);
+        instrumentRepository.updateStatus(repairVo.getInstrumentId(), StatusEnum.REPAIR.getStatus());
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteById(Long id) {
-        try {
+        Optional<SysInstrumentRepair> optionalRepair = repairRepository.findById(id);
+        if (optionalRepair.isPresent()) {
+            SysInstrumentRepair repair = optionalRepair.get();
+            Long instrumentId = repair.getInstrumentId();
             repairRepository.deleteById(id);
-            SysInstrumentRepair repair = repairRepository.findById(id).get();
-            instrumentRepository.updateStatus(repair.getInstrumentId(), StatusEnum.NORMAL.getStatus());
-        } catch (Exception e) {
-            e.printStackTrace();
+            instrumentRepository.updateStatus(instrumentId, StatusEnum.NORMAL.getStatus());
         }
-
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteByIds(Set<Long> ids) {
-        try {
+        List<SysInstrumentRepair> repairs = repairRepository.queryByIds(ids);
+        if (!repairs.isEmpty()) {
             repairRepository.deleteByIds(ids);
             updateStatus(StatusEnum.NORMAL.getStatus(), ids);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(RepairVo repairVo) {
-        try {
-            SysInstrumentRepair instrumentRepair = repairRepository.findById(repairVo.getId()).get();
+        Optional<SysInstrumentRepair> optionalRepair = repairRepository.findById(repairVo.getId());
+        if (optionalRepair.isPresent()) {
+            SysInstrumentRepair instrumentRepair = optionalRepair.get();
             instrumentRepair.setInstrumentId(repairVo.getInstrumentId());
             instrumentRepair.setPrice(repairVo.getPrice());
             instrumentRepair.setRepairPosition(repairVo.getRepairPosition());
@@ -107,20 +107,15 @@ public class SysInstrumentRepairServiceImpl implements SysInstrumentRepairServic
             instrumentRepair.setUpdateBy("admin");
             instrumentRepair.setUpdateTime(DateUtils.getDate());
             repairRepository.save(instrumentRepair);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateStatus(String status, Set<Long> ids) {
-        try {
-            List<SysInstrumentRepair> list = repairRepository.queryByIds(ids);
-            for (SysInstrumentRepair repair : list) {
-                instrumentRepository.updateStatus(repair.getInstrumentId(), status);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        List<SysInstrumentRepair> list = repairRepository.queryByIds(ids);
+        for (SysInstrumentRepair repair : list) {
+            instrumentRepository.updateStatus(repair.getInstrumentId(), status);
         }
     }
 }

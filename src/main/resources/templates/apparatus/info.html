@@ -321,7 +321,13 @@
             previewImage(this, '#add-preview-image');
         });
 
-        // 处理编辑表单提交
+        // 编辑模态框关闭事件处理
+        $('#exampleModal').on('hidden.bs.modal', function () {
+            $('#updateForm')[0].reset();
+            $('#preview-image').attr('src', '').hide();
+        });
+
+        // 更新表单提交成功后重置
         $('#updateBtn').off('click').on('click', async function() {
             try {
                 let form = $("#updateForm").serializeObject();
@@ -339,6 +345,10 @@
                 lightyear.notify('更新成功', 'success', 100);
                 $('#exampleModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
+                
+                // 重置表单
+                $('#updateForm')[0].reset();
+                $('#preview-image').attr('src', '').hide();
             } catch (err) {
                 lightyear.notify('更新失败：' + (err.response?.data?.message || err.message), 'danger', 100);
             }
@@ -365,6 +375,10 @@
                 lightyear.notify('添加成功', 'success', 100);
                 $('#addModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
+                
+                // 重置表单
+                $('#addForm')[0].reset();
+                $('#add-preview-image').attr('src', '').hide();
             } catch (err) {
                 console.error('提交失败:', err);
                 lightyear.notify('添加失败：' + (err.response?.data?.message || err.message), 'danger', 100);
@@ -375,10 +389,23 @@
             $('#addModal').modal();
         });
 
+        // 添加模态框关闭事件处理
+        $('#addModal').on('hidden.bs.modal', function () {
+            $('#addForm')[0].reset();
+            $('#add-preview-image').attr('src', '').hide();
+        });
+
         $('#addPositionModal').on('show.bs.modal', function (event) {
             var modal = $(this);
         });
 
+        // 添加位置模态框关闭事件处理
+        $('#addPositionModal').on('hidden.bs.modal', function () {
+            $('#addPositionForm')[0].reset();
+            $('#instrumentId').val('');
+        });
+
+        // 添加位置表单提交成功后重置
         $('#surePositionBtn').off('click').on('click', function() {
             let form = $("#addPositionForm").serializeObject();
             form['instrumentId'] = $('#instrumentId').val();
@@ -387,6 +414,10 @@
                 lightyear.notify(res.data, 'success', 100);
                 $('#addPositionModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
+                
+                // 重置表单
+                $('#addPositionForm')[0].reset();
+                $('#instrumentId').val('');
             }).catch(err => {
                 lightyear.notify(err.response.data.message, 'danger', 100);
             })
@@ -396,6 +427,15 @@
             var modal = $(this);
         });
 
+        // 添加用途模态框关闭事件处理
+        $('#addUseModal').on('hidden.bs.modal', function () {
+            $('#addUseForm')[0].reset();
+            $('#uinstrumentId').val('');
+            $('#useDesc').val('');
+            $('#ucomment').val('');
+        });
+
+        // 添加用途表单提交成功后重置
         $('#sureUseBtn').off('click').on('click', function() {
             let form = $("#addUseForm").serializeObject();
             form['instrumentId'] = $('#uinstrumentId').val();
@@ -404,6 +444,12 @@
                 lightyear.notify(res.data, 'success', 100);
                 $('#addUseModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
+                
+                // 重置表单
+                $('#addUseForm')[0].reset();
+                $('#uinstrumentId').val('');
+                $('#useDesc').val('');
+                $('#ucomment').val('');
             }).catch(err => {
                 lightyear.notify(err.response.data.message, 'danger', 100);
             })
