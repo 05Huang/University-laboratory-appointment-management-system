@@ -249,48 +249,52 @@
     });
 
     // 图表相关代码
-    const countApply = [[${countApply}]];
     $(document).ready(function(e) {
         let $dashChartBarsCnt = jQuery('.js-chartjs-bars')[0].getContext('2d'),
             $dashChartLinesCnt = jQuery('.js-chartjs-lines')[0].getContext('2d');
-
-        let $dashChartBarsData = {
-            labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
-            datasets: [
-                {
-                    label: '申请数量',
-                    borderWidth: 1,
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    backgroundColor: 'rgba(51, 202, 185, 0.5)',
-                    hoverBackgroundColor: "rgba(51, 202, 185, 0.7)",
-                    hoverBorderColor: "rgba(0, 0, 0, 0)",
-                    data: [countApply, 6, 0, 0, 0, 0, 0]
-                }
-            ]
-        };
-        let $dashChartLinesData = {
-            labels: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
-            datasets: [
-                {
-                    label: '审核数量',
-                    data: [4, countApply, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                    borderColor: '#358ed7',
-                    backgroundColor: 'rgba(53, 142, 215, 0.175)',
-                    borderWidth: 1,
-                    fill: false,
-                    lineTension: 0.5
-                }
-            ]
-        };
-
-        new Chart($dashChartBarsCnt, {
-            type: 'bar',
-            data: $dashChartBarsData
+        
+        // 获取周数据
+        $.get('/api/dashboard/weekly-stats', function(weeklyData) {
+            let $dashChartBarsData = {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [
+                    {
+                        label: '申请数量',
+                        borderWidth: 1,
+                        borderColor: 'rgba(0, 0, 0, 0)',
+                        backgroundColor: 'rgba(51, 202, 185, 0.5)',
+                        hoverBackgroundColor: "rgba(51, 202, 185, 0.7)",
+                        hoverBorderColor: "rgba(0, 0, 0, 0)",
+                        data: weeklyData.weeklyData
+                    }
+                ]
+            };
+            new Chart($dashChartBarsCnt, {
+                type: 'bar',
+                data: $dashChartBarsData
+            });
         });
 
-        var myLineChart = new Chart($dashChartLinesCnt, {
-            type: 'line',
-            data: $dashChartLinesData,
+        // 获取月度数据
+        $.get('/api/dashboard/monthly-stats', function(monthlyData) {
+            let $dashChartLinesData = {
+                labels: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                datasets: [
+                    {
+                        label: '审核数量',
+                        data: monthlyData.monthlyData,
+                        borderColor: '#358ed7',
+                        backgroundColor: 'rgba(53, 142, 215, 0.175)',
+                        borderWidth: 1,
+                        fill: false,
+                        lineTension: 0.5
+                    }
+                ]
+            };
+            new Chart($dashChartLinesCnt, {
+                type: 'line',
+                data: $dashChartLinesData
+            });
         });
     });
 </script>

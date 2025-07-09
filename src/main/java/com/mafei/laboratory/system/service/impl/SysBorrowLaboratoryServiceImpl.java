@@ -18,6 +18,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.*;
 
 /**
@@ -190,6 +193,20 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
     @Override
     public long countAllByUserIdAndStatus(Long userId, String status) {
         return repository.countByUserIdAndBorrowStatus(userId, status);
+    }
+
+    @Override
+    public long countAllByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.plusDays(1).atStartOfDay();
+        return repository.countByCreateTimeBetween(startOfDay, endOfDay);
+    }
+
+    @Override
+    public long countAllByYearMonth(YearMonth yearMonth) {
+        LocalDateTime startOfMonth = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+        return repository.countByCreateTimeBetween(startOfMonth, endOfMonth);
     }
 
     private StatusEnum checkStatus(String status) {

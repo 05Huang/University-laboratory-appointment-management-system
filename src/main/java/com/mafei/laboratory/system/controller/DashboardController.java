@@ -10,7 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -67,5 +72,51 @@ public class DashboardController {
         stats.put("reserveCount", labsNotReturned);
         
         return ResponseEntity.ok(stats);
+    }
+
+    /**
+     * 获取本周每天的申请数量
+     */
+    @GetMapping("/weekly-stats")
+    public ResponseEntity<Map<String, Object>> getWeeklyStats() {
+        Map<String, Object> result = new HashMap<>();
+        List<Long> weeklyData = new ArrayList<>();
+        
+        // 获取本周的开始日期（周一）
+        LocalDate monday = LocalDate.now().with(DayOfWeek.MONDAY);
+        
+        // 统计本周每天的申请数量
+        for (int i = 0; i < 7; i++) {
+            LocalDate currentDate = monday.plusDays(i);
+            long dailyCount = laboratoryService.countAllByDate(currentDate) 
+                          + instrumentService.countAllByDate(currentDate);
+            weeklyData.add(dailyCount);
+        }
+        
+        result.put("weeklyData", weeklyData);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 获取本年每月的审核数量
+     */
+    @GetMapping("/monthly-stats")
+    public ResponseEntity<Map<String, Object>> getMonthlyStats() {
+        Map<String, Object> result = new HashMap<>();
+        List<Long> monthlyData = new ArrayList<>();
+        
+        // 获取当前年份
+        int currentYear = LocalDate.now().getYear();
+        
+        // 统计每月的审核数量
+        for (int month = 1; month <= 12; month++) {
+            YearMonth yearMonth = YearMonth.of(currentYear, month);
+            long monthlyCount = laboratoryService.countAllByYearMonth(yearMonth) 
+                            + instrumentService.countAllByYearMonth(yearMonth);
+            monthlyData.add(monthlyCount);
+        }
+        
+        result.put("monthlyData", monthlyData);
+        return ResponseEntity.ok(result);
     }
 } 

@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -133,4 +134,14 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
      * @return 记录数量
      */
     Long countByBorrowStatus(String status);
+
+    /**
+     * 统计指定时间范围内的借用记录数量
+     *
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 借用记录数量
+     */
+    @Query(value = "SELECT COUNT(*) FROM sys_borrow_instrument WHERE create_time BETWEEN ?1 AND ?2", nativeQuery = true)
+    long countByCreateTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
 }
