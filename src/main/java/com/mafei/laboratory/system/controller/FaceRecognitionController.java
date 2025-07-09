@@ -27,7 +27,6 @@ public class FaceRecognitionController {
             log.info("文件名: {}", file.getOriginalFilename());
             log.info("文件大小: {} bytes", file.getSize());
             log.info("文件类型: {}", file.getContentType());
-
             boolean verified = faceRecognitionService.verifyFace(file);
             return Result.ok(verified);
         } catch (Exception e) {
