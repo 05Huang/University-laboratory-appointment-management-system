@@ -78,7 +78,7 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
         SysBorrowLaboratory borrowInstrument = new SysBorrowLaboratory();
         borrowInstrument.setUserId(borrowVo.getUserId());
         borrowInstrument.setLaboratoryId(borrowVo.getLaboratoryId());
-        borrowInstrument.setStatus(borrowVo.getStatus());
+        borrowInstrument.setStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setBorrowStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setComment(borrowVo.getComment());
         borrowInstrument.setCreateBy(borrowVo.getUserName());
@@ -213,10 +213,13 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
         switch (status) {
             case "3":
             case "4":
+                return StatusEnum.REJECT;
             case "8":
                 return StatusEnum.NORMAL;
             case "5":
                 return StatusEnum.CHECK;
+            case "6":
+                return StatusEnum.SUCCESS;
             case "7":
                 return StatusEnum.BORROW;
             default:

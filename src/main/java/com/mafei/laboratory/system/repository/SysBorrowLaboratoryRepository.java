@@ -53,7 +53,7 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo(" +
             "a.id,a.userId,a.laboratoryId,b.userName,a.status,a.borrowStatus,a.comment,a.createTime,c.laboratoryName) " +
             " from SysBorrowLaboratory as a,SysUser as b,SysLaboratory as c " +
-            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5','8') " +
+            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5','8','6') " +
             " order by a.status desc ,a.createTime desc")
     List<BorrowLaboratoryVo> myFindAll();
 
@@ -65,7 +65,7 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo(" +
             "a.id,a.userId,a.laboratoryId,b.userName,a.status,a.borrowStatus,a.comment,a.createTime,c.laboratoryName) " +
             " from SysBorrowLaboratory as a,SysUser as b,SysLaboratory as c " +
-            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5') " +
+            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5','6') " +
             " order by a.status desc ,a.createTime desc")
     List<BorrowLaboratoryVo> myFindAllReview();
 

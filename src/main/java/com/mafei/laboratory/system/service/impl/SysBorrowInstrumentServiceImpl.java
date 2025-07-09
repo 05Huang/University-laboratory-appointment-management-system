@@ -228,6 +228,8 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
                 return StatusEnum.CHECK;
             case "7":
                 return StatusEnum.BORROW;
+            case "6":
+                return StatusEnum.SUCCESS;
             default:
                 return StatusEnum.DEPRECATED;
         }
