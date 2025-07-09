@@ -20,6 +20,8 @@ public class LoginDto {
     private String password;
 
     private String captcha;
+    
+    private String uuid;
 
     @Override
     public String toString() {
@@ -27,6 +29,7 @@ public class LoginDto {
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", captcha='" + captcha + '\'' +
+                ", uuid='" + uuid + '\'' +
                 '}';
     }
 }
