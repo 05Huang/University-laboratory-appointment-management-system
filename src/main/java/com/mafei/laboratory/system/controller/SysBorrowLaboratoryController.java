@@ -30,6 +30,12 @@ public class SysBorrowLaboratoryController {
         return ResponseEntity.ok(all);
     }
 
+    @GetMapping("/review")
+    public ResponseEntity<Object> findAllReview() {
+        List<BorrowLaboratoryVo> all = laboratoryService.findAllReview();
+        return ResponseEntity.ok(all);
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<Object> findAllByUser(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(laboratoryService.findAllByUserId(userId));

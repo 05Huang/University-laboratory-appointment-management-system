@@ -52,7 +52,7 @@ public interface SysLaboratoryRepository extends JpaRepository<SysLaboratory, Lo
      *
      * @return
      */
-    @Query(value = "select * from sys_laboratory where status = 0", nativeQuery = true)
+    @Query(value = "select * from sys_laboratory where status in ('0', '8')", nativeQuery = true)
     List<SysLaboratory> findByStatus();
 
 
@@ -90,7 +90,7 @@ public interface SysLaboratoryRepository extends JpaRepository<SysLaboratory, Lo
      * @param status
      */
     @Modifying
-    @Query(value = "update sys_instrument set status = ?2 where id = ?1", nativeQuery = true)
+    @Query(value = "update sys_laboratory set status = ?2 where id = ?1", nativeQuery = true)
     void updateStatus(Long id, String status);
 
 }

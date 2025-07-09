@@ -52,9 +52,21 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo(" +
             "a.id,a.userId,a.laboratoryId,b.userName,a.status,a.borrowStatus,a.comment,a.createTime,c.laboratoryName) " +
             " from SysBorrowLaboratory as a,SysUser as b,SysLaboratory as c " +
-            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5') " +
+            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5','8') " +
             " order by a.status desc ,a.createTime desc")
     List<BorrowLaboratoryVo> myFindAll();
+
+    /**
+     * 查询审核中的全部
+     *
+     * @return
+     */
+    @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo(" +
+            "a.id,a.userId,a.laboratoryId,b.userName,a.status,a.borrowStatus,a.comment,a.createTime,c.laboratoryName) " +
+            " from SysBorrowLaboratory as a,SysUser as b,SysLaboratory as c " +
+            " where a.userId = b.userId and a.laboratoryId = c.id and a.status in ('7','1','4','5') " +
+            " order by a.status desc ,a.createTime desc")
+    List<BorrowLaboratoryVo> myFindAllReview();
 
 
     /**
@@ -101,4 +113,21 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
      * @return
      */
     Long countByBorrowStatus(String status);
+
+    /**
+     * 统计用户的所有借用记录数量
+     *
+     * @param userId 用户ID
+     * @return 借用记录数量
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * 统计用户特定状态的借用记录数量
+     *
+     * @param userId 用户ID
+     * @param status 状态
+     * @return 特定状态的借用记录数量
+     */
+    long countByUserIdAndBorrowStatus(Long userId, String status);
 }

@@ -31,6 +31,11 @@ public class SysLaboratoryController {
         return ResponseEntity.ok(laboratoryService.findAll());
     }
 
+    /**
+     * 获取可用实验室列表
+     * 只返回状态为正常(1)或已归还(8)的实验室
+     * @return 实验室列表
+     */
     @GetMapping("/status")
     public ResponseEntity<Object> getAllByStatus() {
         return ResponseEntity.ok(laboratoryService.findAllByStatus());

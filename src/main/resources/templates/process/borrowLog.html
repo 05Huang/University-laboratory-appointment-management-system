@@ -72,7 +72,7 @@
                 field: 'status',
                 title: '状态',
                 formatter: function (value, row, index) {
-                    if (row.status === '0') {
+                    if (row.status === '0'|| row.status === '8') {
                         return '<span class="label label-success">空闲</span>'
                     }
                     if (row.status === '1') {
@@ -81,6 +81,7 @@
                     if (row.status === '2') {
                         return '<span class="label label-info">维修中</span>'
                     }
+
                     return '<span class="label label-purple">已审核</span>';
                 }
             }, {
@@ -95,6 +96,9 @@
                     }
                     if (row.status === '2') {
                         return '<span class="label label-info">已归还</span>'
+                    }
+                    if (row.status === '8') {
+                        return '<span class="label label-warning">已归还</span>'
                     }
                     return '<span class="label label-purple">借用中</span>';
                 }
