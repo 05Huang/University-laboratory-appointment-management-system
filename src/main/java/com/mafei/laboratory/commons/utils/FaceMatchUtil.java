@@ -47,6 +47,9 @@ public class FaceMatchUtil {
      */
     public static double compareFaces(String imagePath1, String imagePath2, String accessToken) {
         try {
+            // 使用限流工具确保API调用频率不超过1次/秒
+            ApiRateLimiter.limitApiCall();
+            
             String base64Image1 = imageToBase64(imagePath1);
             String base64Image2 = imageToBase64(imagePath2);
 
