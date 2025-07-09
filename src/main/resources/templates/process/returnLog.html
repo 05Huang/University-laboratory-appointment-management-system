@@ -81,6 +81,9 @@
                     if (row.status === '2') {
                         return '<span class="label label-info">维修中</span>'
                     }
+                    if (row.status === '7') {
+                        return '<span class="label label-info">使用中</span>'
+                    }
                     return '<span class="label label-purple">已审核</span>';
                 }
             }, {
@@ -104,6 +107,9 @@
                     }
                     if (row.status === '6') {
                         return '<span class="label label-info">未使用</span>'
+                    }
+                    if (row.status === '7') {
+                        return '<span class="label label-info">使用中</span>'
                     }
                     return '<span class="label label-purple">待审核</span>';
                 }

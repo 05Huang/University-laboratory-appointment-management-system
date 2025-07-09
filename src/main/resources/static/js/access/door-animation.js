@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 处理验证结果的语音播报
     function handleVerificationVoice(result) {
         if (result.code === 200 && result.data && result.data.verified && result.data.hasReservation) {
-            speak('验证成功，欢迎使用');
+            speak('验证成功，欢迎进入实验室');
         } else if (result.data) {
             if (result.data.verified && !result.data.hasReservation) {
                 speak('您没有有效的预约记录');
