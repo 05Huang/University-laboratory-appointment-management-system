@@ -255,6 +255,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // 语音播报功能
+    function speak(text) {
+        // 创建语音合成实例
+        const utterance = new SpeechSynthesisUtterance(text);
+        // 设置语音为中文
+        utterance.lang = 'zh-CN';
+        // 播放语音
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // 处理验证结果的语音播报
+    function handleVerificationVoice(result) {
+        if (result.code === 200 && result.data && result.data.verified && result.data.hasReservation) {
+            speak('验证成功，欢迎使用');
+        } else if (result.data) {
+            if (result.data.verified && !result.data.hasReservation) {
+                speak('您没有有效的预约记录');
+            } else if (!result.data.verified) {
+                speak('人脸识别失败，请先注册人脸信息');
+            }
+        } else if (result.message) {
+            // 处理后端返回的错误消息
+            if (result.message.includes('未找到有效的预约记录')) {
+                speak('您没有有效的预约记录');
+            } else if (result.message.includes('人脸识别失败')) {
+                speak('人脸识别失败，请先注册人脸信息');
+            } else {
+                speak(result.message);
+            }
+        } else {
+            speak('系统错误，请重试');
+        }
+    }
+
     // 捕获照片并发送验证请求
     async function captureAndVerify() {
         const video = document.getElementById('videoElement');
@@ -280,6 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const result = await response.json();
                 
+                // 添加语音播报
+                handleVerificationVoice(result);
+                
                 if (result.code === 200 && result.data && result.data.verified && result.data.hasReservation) {
                     // 验证成功，先关闭识别模态框
                     closeModal();
@@ -289,15 +326,26 @@ document.addEventListener('DOMContentLoaded', function() {
                         animateDoors();
                     }, 300);
                 } else {
-                    // 验证失败，显示错误信息并关闭模态框
-                    const errorMessage = result.data ? 
-                        (result.data.verified ? '未找到有效的预约记录' : '人脸识别失败') : 
-                        '验证失败';
+                    // 根据具体情况显示不同的错误信息
+                    let errorMessage;
+                    if (result.data) {
+                        if (result.data.verified && !result.data.hasReservation) {
+                            errorMessage = '您没有有效的预约记录';
+                        } else if (!result.data.verified) {
+                            errorMessage = '人脸识别失败，请先注册人脸信息';
+                        }
+                    } else if (result.message) {
+                        // 使用后端返回的错误消息
+                        errorMessage = result.message;
+                    } else {
+                        errorMessage = '系统错误，请重试';
+                    }
                     showFailure(errorMessage);
                     setTimeout(closeModal, 2000);
                 }
             } catch (error) {
                 console.error('请求失败:', error);
+                speak('网络请求失败，请重试');
                 showFailure('网络请求失败');
                 setTimeout(closeModal, 2000);
             }
