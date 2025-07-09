@@ -3,6 +3,8 @@ package com.mafei.laboratory.system.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.mafei.laboratory.commons.exception.BadRequestException;
+import com.mafei.laboratory.commons.utils.CookieUtils;
+import com.mafei.laboratory.commons.utils.JwtUtils;
 import com.mafei.laboratory.system.entity.SysUser;
 import com.mafei.laboratory.system.entity.vo.ReceivingLog;
 import com.mafei.laboratory.system.entity.vo.UserVo;
@@ -10,6 +12,8 @@ import com.mafei.laboratory.system.service.SysUserService;
 import com.mafei.laboratory.system.service.dto.LoginDto;
 import com.mafei.laboratory.system.service.dto.UpdateStatusDto;
 import com.mafei.laboratory.system.service.dto.UserDto;
+import com.mafei.laboratory.system.service.dto.ChangePwdDto;
+import com.mafei.laboratory.system.service.dto.UserInfoDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +21,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -86,6 +93,44 @@ public class SysUserController {
     @PatchMapping
     public void patchStatus(@RequestBody UpdateStatusDto json) {
         sysUserService.updateStatus(json.getStatus(), json.getIds());
+    }
+
+    /**
+     * 修改密码
+     */
+    @PostMapping("/changePwd")
+    public ResponseEntity<Object> changePassword(@Validated @RequestBody ChangePwdDto changePwdDto, HttpServletRequest request) {
+        // 从Cookie中获取用户ID
+        Cookie cookie = CookieUtils.getCookie(request);
+        if (cookie == null) {
+            throw new BadRequestException("未登录或登录已过期");
+        }
+        String token = cookie.getValue();
+        Map<String, Object> map = JwtUtils.parseToken(token);
+        Long userId = Long.valueOf(String.valueOf(map.get("userId")));
+
+        // 调用service修改密码
+        sysUserService.updatePassword(userId, changePwdDto);
+        return ResponseEntity.ok("密码修改成功");
+    }
+
+    /**
+     * 更新个人信息
+     */
+    @PostMapping("/updateInfo")
+    public ResponseEntity<Object> updateUserInfo(@Validated @RequestBody UserInfoDto userInfoDto, HttpServletRequest request) {
+        // 从Cookie中获取用户ID
+        Cookie cookie = CookieUtils.getCookie(request);
+        if (cookie == null) {
+            throw new BadRequestException("未登录或登录已过期");
+        }
+        String token = cookie.getValue();
+        Map<String, Object> map = JwtUtils.parseToken(token);
+        Long userId = Long.valueOf(String.valueOf(map.get("userId")));
+
+        // 调用service更新个人信息
+        sysUserService.updateUserInfo(userId, userInfoDto);
+        return ResponseEntity.ok("个人信息更新成功");
     }
 
 }

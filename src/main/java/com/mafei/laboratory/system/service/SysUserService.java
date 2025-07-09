@@ -5,6 +5,8 @@ import com.mafei.laboratory.system.entity.vo.LoginUserVo;
 import com.mafei.laboratory.system.entity.vo.UserVo;
 import com.mafei.laboratory.system.service.dto.LoginDto;
 import com.mafei.laboratory.system.service.dto.UserDto;
+import com.mafei.laboratory.system.service.dto.ChangePwdDto;
+import com.mafei.laboratory.system.service.dto.UserInfoDto;
 
 import java.util.List;
 import java.util.Set;
@@ -87,4 +89,18 @@ public interface SysUserService {
      */
     List<UserVo> queryAll();
 
+    /**
+     * 修改用户密码
+     *
+     * @param userId 用户ID
+     * @param changePwdDto 修改密码DTO
+     */
+    void updatePassword(Long userId, ChangePwdDto changePwdDto);
+
+    /**
+     * 更新用户个人信息
+     * @param userId 用户ID
+     * @param userInfoDto 用户信息
+     */
+    void updateUserInfo(Long userId, UserInfoDto userInfoDto);
 }

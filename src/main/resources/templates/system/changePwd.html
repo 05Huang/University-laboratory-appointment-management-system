@@ -12,21 +12,21 @@
       <div class="card">
         <div class="card-body">
 
-          <form method="post" action="#!" class="site-form">
+          <form id="changePwdForm" class="site-form">
             <div class="form-group">
               <label for="old-password">旧密码</label>
-              <input type="password" class="form-control" name="oldpwd" id="old-password" placeholder="输入账号的原登录密码">
+              <input type="password" class="form-control" name="oldPassword" id="old-password" placeholder="输入账号的原登录密码">
             </div>
             <div class="form-group">
               <label for="new-password">新密码</label>
-              <input type="password" class="form-control" name="newpwd" id="new-password" placeholder="输入新的密码">
+              <input type="password" class="form-control" name="newPassword" id="new-password" placeholder="输入新的密码">
             </div>
             <div class="form-group">
               <label for="confirm-password">确认新密码</label>
-              <input type="password" class="form-control" name="confirmpwd" id="confirm-password"
+              <input type="password" class="form-control" name="confirmPassword" id="confirm-password"
                      placeholder="再次确认新密码">
             </div>
-            <button type="submit" class="btn btn-primary">修改密码</button>
+            <button type="button" class="btn btn-primary" onclick="submitForm()">修改密码</button>
           </form>
 
         </div>
@@ -37,5 +37,53 @@
 
 </div>
 <div th:include="include :: footer"></div>
+<script type="text/javascript" th:src="@{/js/bootstrap-notify.min.js}"></script>
+<script type="text/javascript" th:src="@{/js/lightyear.js}"></script>
+
+<script>
+function submitForm() {
+    // 获取表单数据
+    var formData = {
+        oldPassword: $("#old-password").val(),
+        newPassword: $("#new-password").val(),
+        confirmPassword: $("#confirm-password").val()
+    };
+
+    // 表单验证
+    if (!formData.oldPassword) {
+        lightyear.notify('请输入旧密码', 'warning', 2000, 'mdi mdi-alert-circle', 'top', 'center');
+        return;
+    }
+    if (!formData.newPassword) {
+        lightyear.notify('请输入新密码', 'warning', 2000, 'mdi mdi-alert-circle', 'top', 'center');
+        return;
+    }
+    if (!formData.confirmPassword) {
+        lightyear.notify('请输入确认密码', 'warning', 2000, 'mdi mdi-alert-circle', 'top', 'center');
+        return;
+    }
+    if (formData.newPassword !== formData.confirmPassword) {
+        lightyear.notify('两次输入的新密码不一致', 'warning', 2000, 'mdi mdi-alert-circle', 'top', 'center');
+        return;
+    }
+
+    // 发送请求
+    $.ajax({
+        url: '/api/user/changePwd',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            lightyear.notify('密码修改成功', 'success', 2000, 'mdi mdi-check-circle', 'top', 'center');
+            // 清空表单
+            $("#changePwdForm")[0].reset();
+        },
+        error: function(xhr) {
+            var errorMsg = xhr.responseJSON ? xhr.responseJSON.message : "密码修改失败";
+            lightyear.notify(errorMsg, 'danger', 2000, 'mdi mdi-close-circle', 'top', 'center');
+        }
+    });
+}
+</script>
 </body>
 </html>
