@@ -141,4 +141,14 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
      */
     @Query(value = "SELECT COUNT(*) FROM sys_borrow_laboratory WHERE create_time BETWEEN ?1 AND ?2", nativeQuery = true)
     long countByCreateTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+
+    /**
+     * 检查用户是否有有效的实验室预约
+     */
+    boolean existsByUserIdAndStatusAndBorrowStatus(Long userId, String status, String borrowStatus);
+
+    /**
+     * 检查用户是否有指定状态的实验室预约
+     */
+    boolean existsByUserIdAndBorrowStatus(Long userId, String borrowStatus);
 }

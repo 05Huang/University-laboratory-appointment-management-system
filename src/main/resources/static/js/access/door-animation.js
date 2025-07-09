@@ -207,172 +207,161 @@ window.addEventListener('beforeunload', () => {
     stopVideoStream();
 });
 
+// 人脸识别相关的动画和交互逻辑
 document.addEventListener('DOMContentLoaded', function() {
-    // 获取DOM元素
     const verifyButton = document.getElementById('verifyButton');
-    const faceRecognitionModal = document.getElementById('faceRecognitionModal');
-    const closeModal = document.getElementById('closeModal');
-    const videoElement = document.getElementById('videoElement');
+    const modal = document.getElementById('faceRecognitionModal');
+    const closeButton = document.getElementById('closeModal');
     const successModal = document.getElementById('successModal');
     const failureModal = document.getElementById('failureModal');
     const leftDoor = document.querySelector('.left-door');
     const rightDoor = document.querySelector('.right-door');
-
     let stream = null;
-    let verificationInterval = null;
 
-    // 打开摄像头
-    async function startCamera() {
-        try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
-            
-            // 等待视频加载完成后开始扫描
-            videoElement.onloadedmetadata = () => {
-                // 开始定时扫描
-                startVerificationInterval();
-            };
-        } catch (err) {
-            console.error('摄像头访问失败:', err);
-            alert('无法访问摄像头，请确保已授予摄像头权限。');
-        }
-    }
-
-    // 开始定时扫描
-    function startVerificationInterval() {
-        // 清除可能存在的旧定时器
-        if (verificationInterval) {
-            clearInterval(verificationInterval);
-        }
-        
-        // 设置新的定时器
-        verificationInterval = setInterval(async () => {
-            if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
-                console.log('捕获视频帧并发送验证请求...');
-                const imageBlob = await captureFrame();
-                await verifyFace(imageBlob);
-            }
-        }, 3000);
-    }
-
-    // 停止定时扫描
-    function stopVerificationInterval() {
-        if (verificationInterval) {
-            clearInterval(verificationInterval);
-            verificationInterval = null;
-        }
-    }
-
-    // 关闭摄像头
-    function stopCamera() {
-        stopVerificationInterval();
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-        }
-    }
-
-    // 捕获视频帧并转换为Blob
-    function captureFrame() {
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0);
-        return new Promise(resolve => {
-            canvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.95);
-        });
-    }
-
-    // 显示成功或失败提示
-    function showResult(success) {
-        faceRecognitionModal.style.display = 'none';
-        stopCamera();
-        
-        if (success) {
-            // 显示成功提示
-            successModal.style.display = 'flex';
-            successModal.style.opacity = '1';
-            successModal.classList.add('show');
-            
-            // 播放开门动画
-            setTimeout(() => {
-                leftDoor.style.transform = 'translateX(-100%)';
-                rightDoor.style.transform = 'translateX(100%)';
-                
-                // 3秒后关门
-                setTimeout(() => {
-                    leftDoor.style.transform = 'translateX(0)';
-                    rightDoor.style.transform = 'translateX(0)';
-                    successModal.style.opacity = '0';
-                    successModal.classList.remove('show');
-                    setTimeout(() => {
-                        successModal.style.display = 'none';
-                    }, 500);
-                }, 3000);
-            }, 1500);
-        } else {
-            // 显示失败提示
-            failureModal.style.display = 'flex';
-            failureModal.style.opacity = '1';
-            failureModal.classList.add('show');
-            
-            // 2秒后隐藏失败提示
-            setTimeout(() => {
-                failureModal.style.opacity = '0';
-                failureModal.classList.remove('show');
-                setTimeout(() => {
-                    failureModal.style.display = 'none';
-                }, 500);
-            }, 2000);
-        }
-    }
-
-    // 发送人脸识别请求
-    async function verifyFace(imageBlob) {
-        const formData = new FormData();
-        formData.append('file', imageBlob);
-
-        try {
-            console.log('发送人脸验证请求...');
-            const response = await fetch('/api/face-recognition/verify', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            console.log('收到验证结果:', result);
-            
-            if (result.code === 200) {
-                showResult(result.data);
-            } else {
-                showResult(false);
-                console.error('验证失败:', result.msg);
-            }
-        } catch (error) {
-            showResult(false);
-            console.error('请求失败:', error);
-        }
-    }
-
-    // 事件监听器
-    verifyButton.addEventListener('click', () => {
-        console.log('打开人脸识别模态框...');
-        faceRecognitionModal.style.display = 'flex';
+    // 打开人脸识别模态框
+    verifyButton.addEventListener('click', function() {
+        modal.style.display = 'flex';
         startCamera();
     });
 
-    closeModal.addEventListener('click', () => {
-        console.log('关闭人脸识别模态框...');
-        faceRecognitionModal.style.display = 'none';
-        stopCamera();
+    // 关闭模态框
+    closeButton.addEventListener('click', function() {
+        closeModal();
     });
 
-    // 初始化时确保按钮可见和可交互
-    verifyButton.style.visibility = 'visible';
-    verifyButton.style.opacity = '1';
-    verifyButton.style.pointerEvents = 'auto';
-    
-    // 初始化时确保成功提示框隐藏
-    successModal.classList.remove('show');
+    // 启动摄像头并在3秒后捕获照片
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const video = document.getElementById('videoElement');
+            video.srcObject = stream;
+
+            // 3秒后捕获照片并发送验证请求
+            setTimeout(async () => {
+                await captureAndVerify();
+            }, 3000);
+
+        } catch (err) {
+            console.error('摄像头访问失败:', err);
+            showFailure('无法访问摄像头');
+        }
+    }
+
+    // 关闭模态框和摄像头
+    function closeModal() {
+        modal.style.display = 'none';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+    }
+
+    // 捕获照片并发送验证请求
+    async function captureAndVerify() {
+        const video = document.getElementById('videoElement');
+        if (!video.srcObject) {
+            return;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+
+        canvas.toBlob(async function(blob) {
+            const formData = new FormData();
+            formData.append('file', blob, 'face.jpg');
+
+            try {
+                const response = await fetch('/api/face-recognition/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                
+                if (result.code === 200 && result.data && result.data.verified && result.data.hasReservation) {
+                    // 验证成功，先关闭识别模态框
+                    closeModal();
+                    // 等待模态框关闭动画完成后再显示成功提示
+                    setTimeout(() => {
+                        showSuccess();
+                        animateDoors();
+                    }, 300);
+                } else {
+                    // 验证失败，显示错误信息并关闭模态框
+                    const errorMessage = result.data ? 
+                        (result.data.verified ? '未找到有效的预约记录' : '人脸识别失败') : 
+                        '验证失败';
+                    showFailure(errorMessage);
+                    setTimeout(closeModal, 2000);
+                }
+            } catch (error) {
+                console.error('请求失败:', error);
+                showFailure('网络请求失败');
+                setTimeout(closeModal, 2000);
+            }
+        }, 'image/jpeg');
+    }
+
+    // 显示成功提示
+    function showSuccess() {
+        // 确保其他模态框都已关闭
+        modal.style.display = 'none';
+        failureModal.style.display = 'none';
+        
+        // 显示成功提示框
+        successModal.style.display = 'flex';
+        // 强制重绘
+        successModal.offsetHeight;
+        successModal.style.opacity = '1';
+        successModal.querySelector('.modal-content').style.transform = 'scale(1)';
+        
+        // 2秒后隐藏成功提示
+        setTimeout(() => {
+            successModal.style.opacity = '0';
+            successModal.querySelector('.modal-content').style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                successModal.style.display = 'none';
+            }, 300);
+        }, 2000);
+    }
+
+    // 显示失败提示
+    function showFailure(message) {
+        // 确保其他模态框都已关闭
+        modal.style.display = 'none';
+        successModal.style.display = 'none';
+        
+        const failureMessage = failureModal.querySelector('p');
+        failureMessage.textContent = message;
+        
+        // 显示失败提示框
+        failureModal.style.display = 'flex';
+        // 强制重绘
+        failureModal.offsetHeight;
+        failureModal.style.opacity = '1';
+        failureModal.querySelector('.modal-content').style.transform = 'scale(1)';
+        
+        // 2秒后隐藏失败提示
+        setTimeout(() => {
+            failureModal.style.opacity = '0';
+            failureModal.querySelector('.modal-content').style.transform = 'scale(0.8)';
+            setTimeout(() => {
+                failureModal.style.display = 'none';
+            }, 300);
+        }, 2000);
+    }
+
+    // 门的动画
+    function animateDoors() {
+        leftDoor.style.transform = 'translateX(-100%)';
+        rightDoor.style.transform = 'translateX(100%)';
+        
+        // 5秒后关门
+        setTimeout(() => {
+            leftDoor.style.transform = 'translateX(0)';
+            rightDoor.style.transform = 'translateX(0)';
+        }, 5000);
+    }
 }); 

@@ -376,81 +376,135 @@ body {
     right: 0;
 }
 
-/* 成功提示框样式 */
-.success-modal {
+/* 成功和失败提示框的基础样式 */
+.success-modal, .failure-modal {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 1100;
-    display: none;
+    background: rgba(0, 0, 0, 0.7);
     justify-content: center;
     align-items: center;
-}
-
-.success-modal .modal-content {
-    background: #2c3e50;
-    padding: 30px;
-    border-radius: 15px;
-    text-align: center;
-    border: 2px solid #2ecc71;
-    box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
-    transform: scale(0.8);
+    z-index: 2000; /* 确保显示在最上层 */
     opacity: 0;
-    transition: all 0.3s ease-out;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(3px);
 }
 
-.success-modal.show {
-    display: flex;
+.success-modal .modal-content, .failure-modal .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    transform: scale(0.8);
+    transition: all 0.3s ease;
+    max-width: 400px;
+    width: 90%;
+    position: relative;
+    z-index: 2001; /* 内容层级比背景高 */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
-.success-modal.show .modal-content {
-    transform: scale(1);
-    opacity: 1;
-}
-
+/* 成功提示框特定样式 */
 .success-modal .success-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
-    position: relative;
-}
-
-.success-modal .success-icon svg {
-    width: 100%;
-    height: 100%;
 }
 
 .success-modal .success-circle {
     fill: none;
-    stroke: #2ecc71;
-    stroke-width: 3;
-    stroke-dasharray: 180;
-    stroke-dashoffset: 180;
-    animation: drawCircle 1s ease-out forwards;
+    stroke: #4CAF50;
+    stroke-width: 2;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: drawCircle 1s ease forwards;
 }
 
 .success-modal .success-check {
     fill: none;
-    stroke: #2ecc71;
+    stroke: #4CAF50;
     stroke-width: 3;
-    stroke-dasharray: 100;
-    stroke-dashoffset: 100;
-    animation: drawCheck 0.5s ease-out 0.8s forwards;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: drawCheck 0.5s ease forwards 0.5s;
 }
 
-.success-modal h2 {
-    color: #fff;
+/* 失败提示框特定样式 */
+.failure-modal .failure-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+}
+
+.failure-modal .failure-circle {
+    fill: none;
+    stroke: #f44336;
+    stroke-width: 2;
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: drawCircle 1s ease forwards;
+}
+
+.failure-modal .failure-x {
+    fill: none;
+    stroke: #f44336;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: drawX 0.5s ease forwards 0.5s;
+}
+
+.failure-modal h2 {
+    color: #333;
     margin: 0 0 10px;
     font-size: 24px;
+    font-weight: 500;
 }
 
-.success-modal p {
-    color: #bdc3c7;
+.failure-modal p {
+    color: #666;
     margin: 0;
     font-size: 16px;
+    line-height: 1.5;
+}
+
+/* 失败图标的X动画 */
+@keyframes drawX {
+    from {
+        stroke-dashoffset: 48;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* 动画效果 */
+@keyframes drawCircle {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes drawCheck {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+/* 确保其他模态框的z-index较低 */
+.face-recognition-modal {
+    z-index: 1000;
+}
+
+.face-recognition-modal .modal-content {
+    z-index: 1001;
 }
 
 /* 动画关键帧 */
@@ -710,18 +764,6 @@ body {
     }
 }
 
-@keyframes drawCircle {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes drawCheck {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
 @keyframes borderRotate {
     to {
         stroke-dashoffset: -60;
@@ -828,5 +870,27 @@ body {
     }
     to {
         opacity: 1;
+    }
+}
+
+/* 响应式样式调整 */
+@media (max-width: 480px) {
+    .success-modal .modal-content, .failure-modal .modal-content {
+        width: 85%;
+        padding: 20px;
+    }
+
+    .success-modal .success-icon, .failure-modal .failure-icon {
+        width: 60px;
+        height: 60px;
+        margin: 0 auto 15px;
+    }
+
+    .success-modal h2, .failure-modal h2 {
+        font-size: 20px;
+    }
+
+    .success-modal p, .failure-modal p {
+        font-size: 14px;
     }
 } 

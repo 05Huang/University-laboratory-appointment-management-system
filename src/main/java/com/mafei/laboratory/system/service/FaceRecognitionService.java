@@ -1,12 +1,13 @@
 package com.mafei.laboratory.system.service;
 
+import com.mafei.laboratory.system.vo.FaceVerificationVO;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FaceRecognitionService {
     /**
-     * 验证人脸
-     * @param file 上传的人脸图片
-     * @return 是否验证通过
+     * 验证人脸并检查预约状态
+     * @param file 人脸图片文件
+     * @return 验证结果
      */
-    boolean verifyFace(MultipartFile file);
+    FaceVerificationVO verifyFace(MultipartFile file);
 } 
