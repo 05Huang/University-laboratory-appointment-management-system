@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('实验室信息')"/>
+</head>
+<body>
+<div class="container-fluid p-t-15">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-header"><h4>信息导入</h4></div>
+        <div class="card-body">
+          <form id="importData" class="row">
+            <div class="form-group col-md-12">
+              <label class="col-xs-12" for="category-select">请选择实验室类型</label>
+              <div class="col-xs-5">
+                <select class="form-control" id="category-select" name="target" size="1">
+                  <option value="电路实验">电路实验</option>
+                  <option value="物理实验">物理实验</option>
+                  <option value="化学实验">化学实验</option>
+                  <option value="金工实操">金工实操</option>
+                  <option value="计算机机房">计算机机房</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label class="col-xs-12" for="example-select">所属组织</label>
+              <div class="col-xs-5">
+                <select class="form-control" id="example-select" name="depotId" size="1">
+                  <option th:each="depot : ${depots}" th:value="${depot.deptId}" th:text="${depot.deptName}">理学院
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label class="col-xs-12" for="laboratoryName">实验室名称</label>
+              <div class="col-xs-5 col-lg-5">
+                <input type="text" class="form-control" name="laboratoryName" id="laboratoryName"
+                       placeholder="请输入实验室名称">
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label class="col-xs-12" for="capacity">容纳人数</label>
+              <div class="col-xs-5 col-lg-5">
+                <input type="number" class="form-control" name="capacity" id="capacity" placeholder="请输入最大容纳人数">
+              </div>
+            </div>
+
+            <div class="form-group col-md-12">
+              <div class="example-box 6 col-lg-6">
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" checked="" name="useType" value="0"><span>理论教室</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="useType" value="1"><span>综合教室</span>
+                </label>
+                <label class="lyear-radio radio-inline radio-primary">
+                  <input type="radio" name="useType" value="2"><span>实验教室</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label>图片上传</label>
+              <div id="img"></div>
+              <div class="col-xs-12" style="margin-top: 20px">
+                <input type="file" id="imgInput" name="image">
+              </div>
+            </div>
+          </form>
+          <div style="width: 40%;margin-top: 20px">
+            <button class="btn btn-block btn-primary" id="addBtn">提交</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div th:include="include :: table"></div>
+<script type="text/javascript">
+    $(function () {
+        let image = '';
+        $("#imgInput").change(e => {
+            console.log(e);
+            let imgBox = e.target;
+            //上传成功，则回调返回，执行如下函数
+            uploadImg($('#img'), imgBox)
+        });
+
+        function uploadImg(element, tag) {
+            let file = tag.files[0];
+            image = file.name;
+            let imgSrc;
+            if (!/image\/\w+/.test(file.type)) {
+                alert("看清楚，这个需要图片！");
+                return false;
+            }
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+                imgSrc = this.result;
+                let imgs = document.createElement("img");
+                $(imgs).attr("src", imgSrc);
+                element.append(imgs);
+            };
+        }
+
+        $.fn.serializeObject = function () {
+            let ct = this.serializeArray();
+            let obj = {};
+            $.each(ct, function () {
+                if (obj[this.name] !== undefined) {
+                    if (!obj[this.name].push) {
+                        obj[this.name] = [obj[this.name]];
+                    }
+                    obj[this.name].push(this.value || "");
+                } else {
+                    obj[this.name] = this.value || "";
+                }
+            });
+            return obj;
+        }
+
+        $('#addBtn').click(() => {
+            let form = $('#importData').serializeObject();
+            form['image'] = '/images/upload/' + image;
+            if (form.depotId === '') {
+                lightyear.notify('请先选择组织', 'warning', 100);
+                return;
+            }
+            if (form.laboratoryName === '') {
+                lightyear.notify('必须填写实验室名称', 'warning', 100);
+                return;
+            }
+            console.log(form);
+            axios.post('/api/laboratory', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            })
+        })
+    })
+</script>
+</body>
+</html>

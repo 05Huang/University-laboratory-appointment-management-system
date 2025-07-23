@@ -1,0 +1,29 @@
+<!--通用头部-->
+<head th:fragment="header(title)">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title th:text="${title}"></title>
+  <link rel="icon" th:href="@{/favicon.ico}" type="image/ico">
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/css/materialdesignicons.min.css}" rel="stylesheet">
+  <link th:href="@{/css/style.min.css}" rel="stylesheet">
+</head>
+
+<!--通用JS-->
+<div th:fragment="footer">
+  <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+  <script th:src="@{/js/jquery-tags-input/jquery.tagsinput.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/main.min.js}"></script>
+</div>
+
+<div th:fragment="table">
+  <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/main.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+  <script th:src="@{/js/bootstrap-table/bootstrap-table.min.js}"></script>
+  <script th:src="@{/js/bootstrap-table/locale/bootstrap-table-zh-CN.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/bootstrap-notify.min.js}"></script>
+  <script type="text/javascript" th:src="@{/js/lightyear.js}"></script>
+</div>
