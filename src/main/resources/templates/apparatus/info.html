@@ -365,73 +365,32 @@
                 width: 200,
                 events: {
                     'click #edit': function (e, value, row, index) {
-                        $('#exampleModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
-                            modal.find('#id').val(row.id)
-                            modal.find('#instrumentName').val(row.instrumentName)
-                            modal.find('#email').val(row.model)
-                            modal.find('#phonenumber').val(row.price)
-                            modal.find('#status').val(row.status)
-                        })
                         $('#exampleModal').modal();
-                        $('#updateBtn').click(() => {
-                            let form = $("#updateForm").serializeObject();
-                            form['id'] = row.id;
-                            console.log(form);
-                            axios.put('/api/instrument', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#exampleModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        })
+                        $('#id').val(row.id);
+                        $('#name').val(row.instrumentName);
+                        $('#email').val(row.model);
+                        $('#phonenumber').val(row.price);
+                        $('#status').val(row.status);
+                        $('.modal-title').text('编辑：' + row.instrumentName);
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/instrument/' + row.id)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
                     },
                     'click #addPosition': function (e, value, row, index) {
-                        $('#addPositionModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
-                            modal.find('#instrumentId').val(row.id)
-                        })
                         $('#addPositionModal').modal();
-                        $('#surePositionBtn').click(() => {
-                            let form = $("#addPositionForm").serializeObject();
-                            form['instrumentId'] = row.id;
-                            console.log(form);
-                            axios.post('/api/position', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#addPositionModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        });
+                        $('#instrumentId').val(row.id);
+                        $('.modal-title').text('编辑：' + row.instrumentName);
                     },
                     'click #addUse': function (e, value, row, index) {
-                        $('#addUseModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
-                            modal.find('#uinstrumentId').val(row.id)
-                        })
                         $('#addUseModal').modal();
-                        $('#sureUseBtn').click(() => {
-                            let form = $("#addUseForm").serializeObject();
-                            form['instrumentId'] = row.id;
-                            console.log(form);
-                            axios.post('/api/use', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#addUseModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        });
+                        $('#uinstrumentId').val(row.id);
+                        $('.modal-title').text('编辑：' + row.instrumentName);
                     }
                 },
                 formatter: function (value, row, index) {
@@ -443,75 +402,130 @@
                     return result;
                 }
             }]
-        }),
+        });
 
-            $('#addBtn').click(() => {
-                $('#addModal').on('show.bs.modal', function (event) {
-                    var modal = $(this)
-                    modal.find('.modal-title').text('新增设备');
-                })
-                $('#addModal').modal();
-                $('#sureBtn').click(() => {
-                    let form = $("#addForm").serializeObject();
-                    console.log(form);
-                    axios.post('/api/instrument', form).then(res => {
-                        lightyear.notify(res.data, 'success', 100);
-                        $('#addModal').modal('hide');
-                    }).catch(err => {
-                        lightyear.notify(err.response.data.message, 'danger', 100);
-                    })
-                })
-            }),
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
 
-            $('#enableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用信息', 'warning', 100);
-                    return;
-                }
-
-                let json = getStatusJson('0', idData);
-                axios.patch('/api/instrument', json).then(res => {
-                    idData = [];
-                    lightyear.notify('启用成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
-
-            $('#disableBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要启用的信息', 'warning', 100);
-                    return;
-                }
-
-                let json = getStatusJson('1', idData);
-                console.log(json);
-                axios.patch('/api/instrument', json).then(res => {
-                    idData = [];
-                    lightyear.notify('禁用成功', 'success', 100);
-                }).catch(err => {
-                    console.log(err.response);
-                    lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
-                })
-            }),
-
-            $('#delBtn').click(() => {
-                if (idData.length === 0) {
-                    lightyear.notify('请先选择要删除的用户', 'warning', 100);
-                    return;
-                }
-                axios({
-                    method: 'delete',
-                    url: '/api/instrument',
-                    data: idData
-                }).then(res => {
-                    idData = [];
-                    lightyear.notify('删除成功', 'success', 100);
-                }).catch(err => {
-                    lightyear.notify('删除失败' + err.response.message, 'danger', 100);
-                });
+        $('#updateBtn').off('click').on('click', function() {
+            let form = $("#updateForm").serializeObject();
+            form['id'] = $('#id').val();
+            console.log(form);
+            axios.put('/api/instrument', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#exampleModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
             })
+        });
 
+        $('#addModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+            modal.find('.modal-title').text('新增设备');
+        });
+
+        $('#sureBtn').off('click').on('click', function() {
+            let form = $("#addForm").serializeObject();
+            console.log(form);
+            axios.post('/api/instrument', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            })
+        });
+
+        $('#addBtn').off('click').on('click', function() {
+            $('#addModal').modal();
+        });
+
+        $('#addPositionModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
+
+        $('#surePositionBtn').off('click').on('click', function() {
+            let form = $("#addPositionForm").serializeObject();
+            form['instrumentId'] = $('#instrumentId').val();
+            console.log(form);
+            axios.post('/api/position', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addPositionModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            })
+        });
+
+        $('#addUseModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
+
+        $('#sureUseBtn').off('click').on('click', function() {
+            let form = $("#addUseForm").serializeObject();
+            form['instrumentId'] = $('#uinstrumentId').val();
+            console.log(form);
+            axios.post('/api/use', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addUseModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            })
+        });
+
+        $('#enableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用信息', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('0', idData);
+            axios.patch('/api/instrument', json).then(res => {
+                idData = [];
+                lightyear.notify('启用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
+            })
+        });
+
+        $('#disableBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要启用的信息', 'warning', 100);
+                return;
+            }
+
+            let json = getStatusJson('1', idData);
+            console.log(json);
+            axios.patch('/api/instrument', json).then(res => {
+                idData = [];
+                lightyear.notify('禁用成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                console.log(err.response);
+                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
+            })
+        });
+
+        $('#delBtn').click(() => {
+            if (idData.length === 0) {
+                lightyear.notify('请先选择要删除的用户', 'warning', 100);
+                return;
+            }
+            axios({
+                method: 'delete',
+                url: '/api/instrument',
+                data: idData
+            }).then(res => {
+                idData = [];
+                lightyear.notify('删除成功', 'success', 100);
+            }).catch(err => {
+                lightyear.notify('删除失败' + err.response.message, 'danger', 100);
+            });
+        })
     });
 </script>
 </body>

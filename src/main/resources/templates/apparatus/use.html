@@ -179,28 +179,19 @@
                 width: 200,
                 events: {
                     'click #edit': function (e, value, row, index) {
-                        $('#addUseModal').on('show.bs.modal', function (event) {
-                            var modal = $(this)
-                            modal.find('.modal-title').text('编辑：' + row.instrumentName);
-                            modal.find('#instrumentId').val(row.id)
-                        })
                         $('#addUseModal').modal();
-                        $('#sureUseBtn').click(() => {
-                            let form = $("#addUseForm").serializeObject();
-                            form['instrumentId'] = row.id;
-                            console.log(form);
-                            axios.put('/api/use', form).then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#addUseModal').modal('hide');
-                            }).catch(err => {
-                                lightyear.notify(err.response.data.message, 'danger', 100);
-                            })
-                        });
+                        $('.modal-title').text('编辑：' + row.instrumentName);
+                        $('#instrumentId').val(row.id);
+                        $('#useTitle').val(row.useTitle);
+                        $('#example-select').val(row.type);
+                        $('#useDesc').val(row.useDesc);
+                        $('#comment').val(row.comment);
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/use/' + row.id)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -214,7 +205,26 @@
                 }
             }]
         })
-        $('#delBtn').click(() => {
+
+        // 初始化模态框事件
+        $('#addUseModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
+
+        $('#sureUseBtn').off('click').on('click', function() {
+            let form = $("#addUseForm").serializeObject();
+            form['instrumentId'] = $('#instrumentId').val();
+            console.log(form);
+            axios.put('/api/use', form).then(res => {
+                lightyear.notify(res.data, 'success', 100);
+                $('#addUseModal').modal('hide');
+                $('#table').bootstrapTable('refresh');
+            }).catch(err => {
+                lightyear.notify(err.response.data.message, 'danger', 100);
+            });
+        });
+
+        $('#delBtn').off('click').on('click', function() {
             if (idData.length === 0) {
                 lightyear.notify('请先选择要删除的数据', 'warning', 100);
                 return;
@@ -226,11 +236,11 @@
             }).then(res => {
                 idData = [];
                 lightyear.notify('删除成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
             }).catch(err => {
                 lightyear.notify('删除失败' + err.response.message, 'danger', 100);
             });
-        })
-
+        });
     });
 </script>
 </body>

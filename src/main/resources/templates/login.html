@@ -11,156 +11,122 @@
   <link rel="stylesheet" th:href="@{/css/style.min.css}">
   <style>
       body {
-          background-color: #fff;
-      }
-
-      .lyear-login-box {
-          position: relative;
-          overflow-x: hidden;
-          width: 100%;
-          height: 100%;
-          -webkit-transition: 0.5s;
-          -o-transition: 0.5s;
-          transition: 0.5s;
-      }
-
-      .lyear-login-left {
-          width: 50%;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          position: fixed;
-          height: 100%;
-          z-index: 555;
+          margin: 0;
+          padding: 0;
+          height: 100vh;
+          background: url(/images/login-bg-5.jpg) no-repeat center center fixed;
           background-size: cover;
-          background-repeat: no-repeat;
-          background-position: center center;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          position: relative;
       }
 
-      .lyear-overlay {
+      body::before {
+          content: '';
           position: absolute;
           top: 0;
-          bottom: 0;
           left: 0;
           right: 0;
-          z-index: 10;
-          background: rgba(0, 0, 0, 0.5);
+          bottom: 0;
+          background: rgba(0, 0, 0, 0);
+          z-index: 1;
+      }
+
+      .login-container {
+          background: rgba(255, 255, 255, 0.95);
+          padding: 30px 40px;
+          border-radius: 10px;
+          box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+          width: 100%;
+          max-width: 400px;
+          position: relative;
+          z-index: 2;
       }
 
       .lyear-logo {
-          margin-bottom: 50px;
+          margin-bottom: 30px;
+          text-align: center;
       }
 
-      .lyear-featured {
-          z-index: 12;
-          position: absolute;
-          bottom: 0;
-          padding: 30px;
-          width: 100%;
+      .lyear-logo h2 {
+          color: #333;
+          margin: 0;
+          font-size: 24px;
       }
 
-      .lyear-featured h4 {
-          color: #fff;
-          line-height: 32px;
+      .form-group {
+          margin-bottom: 20px;
       }
 
-      .lyear-featured h4 small {
-          color: #fff;
-          display: block;
-          text-align: right;
-          margin-top: 15px;
+      .form-control {
+          height: 45px;
+          border-radius: 4px;
       }
 
-      .lyear-login-right {
-          margin-left: 50%;
-          position: relative;
-          z-index: 999;
-          padding: 100px;
-          background-color: #fff;
+      .btn-primary {
+          height: 45px;
+          font-size: 16px;
+          font-weight: 500;
       }
 
-      @media screen and (max-width: 1024px) {
-          .lyear-login-right {
-              padding: 50px;
-          }
+      .captcha-group {
+          display: flex;
+          gap: 10px;
       }
 
-      @media screen and (max-width: 820px) {
-          .lyear-login-left {
-              width: 100%;
-              position: relative;
-              z-index: 999;
-              height: 300px;
-          }
-
-          .lyear-login-right {
-              margin-left: 0;
-          }
+      .captcha-group .form-control {
+          flex: 1;
       }
 
-      @media screen and (max-width: 480px) {
-          .lyear-login-right {
-              padding: 50px;
-          }
+      .captcha-group img {
+          height: 45px;
+          border-radius: 4px;
       }
 
-      @media screen and (max-width: 320px) {
-          .lyear-login-right {
-              padding: 30px;
+      @media (max-width: 576px) {
+          .login-container {
+              margin: 20px;
+              padding: 20px;
           }
       }
   </style>
 </head>
 
 <body>
-<div class="lyear-login-box">
-  <div class="lyear-login-left" style="background-image: url(/images/login-bg-1.jpg)">
-    <div class="lyear-overlay"></div>
-    <div class="lyear-featured">
-      <h4>高校实验室管理系统<small> - 2021年2月17日18:21:43</small></h4>
-    </div>
-  </div>
-  <div class="lyear-login-right">
-
-    <div class="lyear-logo text-center">
-      <a href=""><h2>高校实验室管理系统</h2></a>
+<div class="login-container">
+    <div class="lyear-logo">
+        <h2>高校实验室智能预约平台</h2>
     </div>
     <form id="loginForm">
-      <div class="form-group">
-        <label for="username">用户名</label>
-        <input type="text" class="form-control" name="username" id="username" placeholder="用户名">
-      </div>
-
-      <div class="form-group">
-        <label for="password">密码</label>
-        <input type="password" class="form-control" name="password" id="password" placeholder="密码">
-      </div>
-
-      <div class="form-group">
-        <label for="captcha">验证码</label>
-        <div class="row">
-          <div class="col-xs-7 col-lg-6">
-            <input type="text" name="captcha" class="form-control" placeholder="验证码">
-          </div>
-          <div class="col-xs-5 col-lg-3">
-            <img th:src="@{/auth/captcha}" class="pull-right" id="captcha"
-                 style="cursor: pointer;"
-                 onclick="this.src=this.src+'?'+Math.random();" title="点击刷新" alt="captcha">
-          </div>
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" class="form-control" name="username" id="username" placeholder="请输入用户名">
         </div>
-      </div>
 
-      <div class="form-group">
-        <label class="lyear-checkbox checkbox-primary m-t-10">
-          <input type="checkbox" checked=""><span>记住我</span>
-        </label>
-      </div>
+        <div class="form-group">
+            <label for="password">密码</label>
+            <input type="password" class="form-control" name="password" id="password" placeholder="请输入密码">
+        </div>
+
+        <div class="form-group">
+            <label for="captcha">验证码</label>
+            <div class="captcha-group">
+                <input type="text" name="captcha" id="captcha" class="form-control" placeholder="请输入验证码">
+                <img th:src="@{/auth/captcha}" id="captchaImg" style="cursor: pointer;"
+                     onclick="this.src=this.src+'?'+Math.random();" title="点击刷新" alt="captcha">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="lyear-checkbox checkbox-primary">
+                <input type="checkbox" checked=""><span>记住我</span>
+            </label>
+        </div>
     </form>
     <div>
-      <button class="btn btn-block btn-primary" id="loginBtn">立即登录</button>
+        <button class="btn btn-block btn-primary" id="loginBtn">立即登录</button>
     </div>
-
-  </div>
 </div>
 <script type="text/javascript" th:src="@{/js/jquery.min.js}"></script>
 <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
@@ -238,7 +204,7 @@
             lightyear.loading('hide')
             // console.log("err", err.response)
             lightyear.notify(err.response.data.message, 'danger', 200)
-            $('#captcha').attr('src', '/auth/captcha' + '?' + Math.random())
+            $('#captchaImg').attr('src', '/auth/captcha' + '?' + Math.random())
         })
     })
 

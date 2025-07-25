@@ -279,6 +279,7 @@
                             axios.put('/api/user', form).then(res => {
                                 lightyear.notify(res.data, 'success', 100);
                                 $('#exampleModal').modal('hide');
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                                 lightyear.notify(err.response.data.message, 'danger', 100);
                             })
@@ -288,6 +289,7 @@
                         axios.delete('/api/user/' + row.userId)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
+                                $('#table').bootstrapTable('refresh');
                             }).catch(err => {
                             lightyear.notify(err.response, 'danger', 100);
                         });
@@ -316,6 +318,7 @@
                     axios.post('/api/user', form).then(res => {
                         lightyear.notify(res.data, 'success', 100);
                         $('#addModal').modal('hide');
+                        $('#table').bootstrapTable('refresh');
                     }).catch(err => {
                         lightyear.notify(err.response.data.message, 'danger', 100);
                     })
@@ -332,6 +335,7 @@
                 axios.patch('/api/user', json).then(res => {
                     idData = [];
                     lightyear.notify('启用成功', 'success', 100);
+                    $('#table').bootstrapTable('refresh');
                 }).catch(err => {
                     lightyear.notify('启用失败' + err.response.data.message, 'danger', 100);
                 })
@@ -348,6 +352,7 @@
                 axios.patch('/api/user', json).then(res => {
                     idData = [];
                     lightyear.notify('禁用成功', 'success', 100);
+                    $('#table').bootstrapTable('refresh');
                 }).catch(err => {
                     console.log(err.response);
                     lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);

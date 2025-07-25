@@ -92,19 +92,19 @@
             return obj;
         }
 
-
+        // 初始化表格
         $('#table').bootstrapTable({
-            url: '/api/instrument/repair',                                     // 通过url 获取数据
-            showRefresh: true,                                    // 是否刷新按钮
-            sortStable: true,                                      // 是否支持排序
-            cache: false,                                          // 是否使用缓存
-            pagination: true,                                      // 是否显示分页
+            url: '/api/instrument/repair',
+            showRefresh: true,
+            sortStable: true,
+            cache: false,
+            pagination: true,
             sidePagination: 'client',
             searchAlign: 'right',
-            search: true,                                         // 是否有搜索框
-            pageNumber: 1,                                         // 首页页码，默认为1
+            search: true,
+            pageNumber: 1,
             pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
+            pageList: [10, 20, 30],
             onCheck: function (row) {
                 if (contains(row.id)) {
                     idData.push(row.id);
@@ -154,7 +154,8 @@
                 }
             }]
         });
-        $('#addBtn').click(() => {
+
+        $('#addBtn').off('click').on('click', function() {
             if (idData.length === 0) {
                 lightyear.notify('请先选择要借用的设备', 'danger', 100);
                 return;
@@ -183,11 +184,12 @@
             console.log(form);
             axios.post('/api/borrow/instrument', form).then(res => {
                 lightyear.notify(res.data, 'success', 100);
+                $('#table').bootstrapTable('refresh');
+                idData = [];
             }).catch(err => {
                 lightyear.notify(err.response.data.message, 'danger', 100);
-            })
+            });
         });
-
     });
 </script>
 </body>

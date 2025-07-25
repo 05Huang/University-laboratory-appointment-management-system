@@ -89,17 +89,42 @@
         }
 
         $('#table').bootstrapTable({
-            url: '/api/borrow/instrument',                                     // 通过url 获取数据
-            showRefresh: true,                                    // 是否刷新按钮
-            sortStable: true,                                      // 是否支持排序
-            cache: false,                                          // 是否使用缓存
-            pagination: true,                                      // 是否显示分页
+            url: '/api/borrow/instrument',
+            showRefresh: true,
+            sortStable: true,
+            cache: false,
+            pagination: true,
             sidePagination: 'client',
             searchAlign: 'right',
-            search: true,                                         // 是否有搜索框
-            pageNumber: 1,                                         // 首页页码，默认为1
+            search: true,
+            pageNumber: 1,
             pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
+            pageList: [10, 20, 30],
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
             columns: [{
                 name: 'check',
                 align: 'center',
@@ -164,22 +189,8 @@
                             return;
                         }
                         $('#exampleModal').modal();
-                        $('#sureBtn').click(() => {
-                            let form = $('#updateForm').serializeObject();
-                            let data = {};
-                            data.comment = form.comment;
-                            data.status = '4';
-                            data.id = row.id;
-
-                            axios.patch('/auth/instrument/' + row.id, data)
-                                .then(res => {
-                                    $('#exampleModal').modal('hide');
-                                    lightyear.notify(res.data, 'success', 100);
-                                }).catch(err => {
-                                $('#exampleModal').modal('hide');
-                                lightyear.notify(err.response, 'danger', 100);
-                            });
-                        });
+                        $('#comment').val('');
+                        $('#sureBtn').data('action', 'disable').data('row', row);
                     },
                     'click #enable': function (e, value, row, index) {
                         if (row.status === '7') {
@@ -187,22 +198,8 @@
                             return;
                         }
                         $('#exampleModal').modal();
-                        $('#sureBtn').click(() => {
-                            let form = $('#updateForm').serializeObject();
-                            let data = {};
-                            data.comment = form.comment;
-                            data.status = '7';
-                            data.id = row.id;
-
-                            axios.patch('/auth/instrument/' + row.id, data)
-                                .then(res => {
-                                    $('#exampleModal').modal('hide');
-                                    lightyear.notify(res.data, 'success', 100);
-                                }).catch(err => {
-                                $('#exampleModal').modal('hide');
-                                lightyear.notify(err.response, 'danger', 100);
-                            });
-                        });
+                        $('#comment').val('');
+                        $('#sureBtn').data('action', 'enable').data('row', row);
                     }
                 },
                 formatter: function (value, row, index) {
@@ -214,7 +211,32 @@
             }]
         });
 
-        $('#enableBtn').click(() => {
+        $('#exampleModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+        });
+
+        $('#sureBtn').off('click').on('click', function() {
+            let action = $(this).data('action');
+            let row = $(this).data('row');
+            let form = $('#updateForm').serializeObject();
+            let data = {
+                comment: form.comment,
+                id: row.id,
+                status: action === 'enable' ? '7' : '4'
+            };
+
+            axios.patch('/auth/instrument/' + row.id, data)
+                .then(res => {
+                    $('#exampleModal').modal('hide');
+                    lightyear.notify(res.data, 'success', 100);
+                    $('#table').bootstrapTable('refresh');
+                }).catch(err => {
+                    $('#exampleModal').modal('hide');
+                    lightyear.notify(err.response, 'danger', 100);
+                });
+        });
+
+        $('#enableBtn').off('click').on('click', function() {
             if (idData.length === 0) {
                 lightyear.notify('请先选择要审核的信息', 'warning', 100);
                 return;
@@ -224,12 +246,14 @@
             axios.patch('/auth/instrument', json)
                 .then(res => {
                     lightyear.notify(res.data, 'success', 100);
+                    $('#table').bootstrapTable('refresh');
+                    idData = [];
                 }).catch(err => {
-                lightyear.notify(err.response, 'danger', 100);
-            });
+                    lightyear.notify(err.response, 'danger', 100);
+                });
         });
 
-        $('#disableBtn').click(() => {
+        $('#disableBtn').off('click').on('click', function() {
             if (idData.length === 0) {
                 lightyear.notify('请先选择要驳回的信息', 'warning', 100);
                 return;
@@ -239,11 +263,12 @@
             console.log(json);
             axios.patch('/api/instrument', json).then(res => {
                 idData = [];
-                lightyear.notify('禁用成功', 'success', 100);
+                lightyear.notify('驳回成功', 'success', 100);
+                $('#table').bootstrapTable('refresh');
             }).catch(err => {
                 console.log(err.response);
-                lightyear.notify('禁用失败' + err.response.data.message, 'danger', 100);
-            })
+                lightyear.notify('驳回失败' + err.response.data.message, 'danger', 100);
+            });
         });
     });
 </script>
