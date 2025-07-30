@@ -47,6 +47,7 @@ public class SysInstrumentController {
 
     @PatchMapping
     public void patchStatus(@RequestBody UpdateStatusDto json) {
+        System.out.println("PATCH 请求已接收: " + json);
         instrumentService.updateStatus(json.getStatus(), json.getIds());
     }
 
