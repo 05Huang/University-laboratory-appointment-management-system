@@ -64,7 +64,7 @@ public class FaceMatch {
             map1.put("image_type", "BASE64");
             map1.put("face_type", "LIVE");   // LIVE、IDCARD、WATERMARK、CERT
             map1.put("quality_control", "LOW");  // 图片质量控制
-            map1.put("liveness_control", "NORMAL");  // 活体检测控制
+            map1.put("liveness_control", "NONE");  // 活体检测控制
 
             // 第二张图片
             Map<String, Object> map2 = new HashMap<>();
@@ -72,7 +72,7 @@ public class FaceMatch {
             map2.put("image_type", "BASE64");
             map2.put("face_type", "LIVE");
             map2.put("quality_control", "LOW");
-            map2.put("liveness_control", "NORMAL");
+            map2.put("liveness_control", "NONE");
 
             // 把两张图加进去
             images.add(map1);
@@ -93,8 +93,8 @@ public class FaceMatch {
 
     public static void main(String[] args) {
         // 本地图片路径（换成你的）
-        String imagePath1 = "C:/Users/你的用户名/Desktop/face1.jpg";
-        String imagePath2 = "C:/Users/你的用户名/Desktop/face2.jpg";
+        String imagePath1 = "E:\\laboratory-master\\src\\test\\resources\\images\\yuan1.png";
+        String imagePath2 = "E:\\laboratory-master\\src\\test\\resources\\images\\yuan2.png";
         faceMatch(imagePath1, imagePath2);
     }
 }
