@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:include="include :: header('人脸录入')"/>
+    <style>
+        .face-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 640px;
+            margin: 0 auto;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        #video {
+            width: 100%;
+            background-color: #f5f5f5;
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+            -moz-transform: scaleX(-1);
+        }
+        
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .preview-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        #preview {
+            max-width: 320px;
+            border-radius: 8px;
+            display: none;
+            margin: 10px auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transform: scaleX(1);
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>人脸录入</h4>
+                </div>
+                <div class="card-body">
+                    <div class="face-container">
+                        <div class="video-container">
+                            <video id="video" autoplay playsinline></video>
+                        </div>
+                        <div class="preview-container">
+                            <canvas id="preview"></canvas>
+                            <div class="status-message"></div>
+                        </div>
+                        <div class="controls">
+                            <button type="button" class="btn btn-primary m-r-5" id="captureBtn">
+                                <i class="mdi mdi-camera"></i> 拍摄照片
+                            </button>
+                            <button type="button" class="btn btn-success m-r-5" id="submitBtn" disabled>
+                                <i class="mdi mdi-check"></i> 提交
+                            </button>
+                            <button type="button" class="btn btn-warning" id="retakeBtn" disabled>
+                                <i class="mdi mdi-camera-retake"></i> 重新拍摄
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:include="include :: footer"/>
+<script type="text/javascript" th:src="@{/js/axios.min.js}"></script>
+<script th:inline="javascript" type="text/javascript">
+$(function() {
+    // 从Thymeleaf获取用户ID
+    const userId = [[${userId}]];
+    
+    let video = document.getElementById('video');
+    let canvas = document.getElementById('preview');
+    let captureBtn = document.getElementById('captureBtn');
+    let submitBtn = document.getElementById('submitBtn');
+    let retakeBtn = document.getElementById('retakeBtn');
+    let statusMessage = document.querySelector('.status-message');
+    
+    // 获取摄像头权限并启动预览
+    async function startCamera() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "user",
+                    mirrored: false
+                }
+            });
+            video.srcObject = stream;
+        } catch (err) {
+            showMessage('无法访问摄像头，请确保已授予权限。', 'error');
+        }
+    }
+    
+    // 显示状态消息
+    function showMessage(message, type) {
+        console.log('显示消息:', message, type);
+        statusMessage.textContent = message;
+        statusMessage.className = 'status-message ' + type;
+        statusMessage.style.display = 'block';
+    }
+    
+    // 拍照
+    captureBtn.addEventListener('click', function() {
+        console.log('拍照按钮被点击');
+        // 创建一个临时canvas来处理镜像转换
+        let tempCanvas = document.createElement('canvas');
+        tempCanvas.width = video.videoWidth;
+        tempCanvas.height = video.videoHeight;
+        let tempCtx = tempCanvas.getContext('2d');
+        
+        // 在临时canvas上绘制未镜像的图像
+        tempCtx.scale(-1, 1); // 水平翻转
+        tempCtx.drawImage(video, -video.videoWidth, 0, video.videoWidth, video.videoHeight);
+        
+        // 将临时canvas的内容绘制到显示用的canvas上
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        let ctx = canvas.getContext('2d');
+        ctx.drawImage(tempCanvas, 0, 0);
+        
+        canvas.style.display = 'block';
+        submitBtn.disabled = false;
+        retakeBtn.disabled = false;
+        captureBtn.disabled = true;
+    });
+    
+    // 重新拍摄
+    retakeBtn.addEventListener('click', function() {
+        console.log('重拍按钮被点击');
+        canvas.style.display = 'none';
+        submitBtn.disabled = true;
+        retakeBtn.disabled = true;
+        captureBtn.disabled = false;
+        statusMessage.style.display = 'none';
+    });
+    
+    // 提交（上传图片到后端）
+    submitBtn.addEventListener('click', function() {
+        console.log('提交按钮被点击');
+        // 将canvas的内容转换为blob
+        canvas.toBlob(function(blob) {
+            console.log('图片已转换为Blob:', blob);
+            // 创建FormData对象
+            const formData = new FormData();
+            // 将blob作为文件添加到FormData
+            formData.append('file', blob, 'face.png');
+            // 添加用户ID
+            formData.append('userId', userId);
+            
+            console.log('准备发送请求，用户ID:', userId);
+            // 发送到后端
+            axios.post('/api/userFace/upload', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            }).then(res => {
+                console.log('收到响应:', res);
+                if(res.data.code === 200) {
+                    showMessage('人脸信息上传成功！', 'success');
+                    // 重置界面
+                    setTimeout(() => {
+                        canvas.style.display = 'none';
+                        submitBtn.disabled = true;
+                        retakeBtn.disabled = true;
+                        captureBtn.disabled = false;
+                        statusMessage.style.display = 'none';
+                    }, 2000);
+                } else {
+                    showMessage(res.data.msg || '上传失败，请重试', 'error');
+                }
+            }).catch(err => {
+                console.error('上传错误:', err);
+                showMessage('上传失败：' + (err.response?.data?.message || err.message), 'error');
+            });
+        }, 'image/png');
+    });
+    
+    // 启动摄像头
+    startCamera();
+});
+</script>
+</body>
+</html> 

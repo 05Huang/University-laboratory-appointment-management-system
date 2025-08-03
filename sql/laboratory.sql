@@ -334,6 +334,7 @@ INSERT INTO `sys_menu` VALUES (113, '角色管理', 4, 2, '/system/role', '', 'C
 INSERT INTO `sys_menu` VALUES (114, '菜单管理', 4, 3, '/system/menu', '', 'C', '0', '1', 'system:user:view', '', 'admin', '2021-02-09 19:24:43', '', NULL, '设备借用记录');
 INSERT INTO `sys_menu` VALUES (115, '预约实验室', 6, 1, '/borrow/laboratory', '', 'C', '0', '1', '', '', 'admin', '2021-02-09 19:24:43', '', NULL, '预约实验室');
 INSERT INTO `sys_menu` VALUES (116, '设备借用', 5, 1, '/borrow/apparatus', '', 'C', '0', '1', '', '', 'admin', '2021-02-09 19:24:43', '', NULL, '预约实验室');
+INSERT INTO `sys_menu` VALUES (117, '人脸录入', 4, 4, '/system/face_register', '', 'C', '0', '1', 'system:user:view', 'mdi mdi-face-recognition', 'admin', '2021-02-09 19:24:43', '', NULL, '教师人脸信息录入');
 
 -- ----------------------------
 -- Table structure for sys_role
@@ -394,10 +395,15 @@ INSERT INTO `sys_role_menu` VALUES (1, 111);
 INSERT INTO `sys_role_menu` VALUES (1, 112);
 INSERT INTO `sys_role_menu` VALUES (1, 113);
 INSERT INTO `sys_role_menu` VALUES (1, 114);
+INSERT INTO `sys_role_menu` VALUES (1, 115);
+INSERT INTO `sys_role_menu` VALUES (1, 116);
+INSERT INTO `sys_role_menu` VALUES (1, 117);
 INSERT INTO `sys_role_menu` VALUES (2, 5);
 INSERT INTO `sys_role_menu` VALUES (2, 6);
 INSERT INTO `sys_role_menu` VALUES (2, 115);
 INSERT INTO `sys_role_menu` VALUES (2, 116);
+INSERT INTO `sys_role_menu` VALUES (2, 117);
+INSERT INTO `sys_role_menu` VALUES (2, 4);
 INSERT INTO `sys_role_menu` VALUES (3, 5);
 INSERT INTO `sys_role_menu` VALUES (3, 116);
 

@@ -63,4 +63,17 @@ public class SystemController {
     public String menu() {
         return prefix + "/menu";
     }
+
+    @GetMapping("/face_register")
+    public String faceRegister(HttpServletRequest request, Model model) {
+        model.addAttribute("userId", getUserId(request));
+        return prefix + "/face_register";
+    }
+
+    private Long getUserId(HttpServletRequest request) {
+        Cookie cookie = CookieUtils.getCookie(request);
+        String token = cookie.getValue();
+        Map<String, Object> map = JwtUtils.parseToken(token);
+        return Long.valueOf(String.valueOf(map.get("userId")));
+    }
 }
