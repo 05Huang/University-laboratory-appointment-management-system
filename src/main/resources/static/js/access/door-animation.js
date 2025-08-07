@@ -210,176 +210,168 @@ window.addEventListener('beforeunload', () => {
 document.addEventListener('DOMContentLoaded', function() {
     // 获取DOM元素
     const verifyButton = document.getElementById('verifyButton');
-    const faceRecognitionModal = document.getElementById('faceRecognitionModal');
-    const closeModalButton = document.getElementById('closeModal');
+    const modal = document.getElementById('faceRecognitionModal');
+    const closeButton = document.getElementById('closeModal');
     const successModal = document.getElementById('successModal');
-    const videoElement = document.getElementById('videoElement');
+    const video = document.getElementById('videoElement');
     const statusText = document.querySelector('.status-text');
-    const leftDoor = document.querySelector('.left-door');
-    const rightDoor = document.querySelector('.right-door');
 
-    // 初始化变量
     let stream = null;
-    let captureTimeout = null;
-    let isVerifying = false;
 
-    // 打开人脸识别弹窗
-    function openFaceRecognitionModal() {
-        if (isVerifying) return;
-        console.log('打开人脸识别模态框');
-        faceRecognitionModal.classList.add('show');
-        startCamera();
-    }
-
-    // 关闭人脸识别弹窗
-    function closeFaceRecognitionModal() {
-        console.log('关闭人脸识别模态框');
-        faceRecognitionModal.classList.remove('show');
-        stopCamera();
-    }
-
-    // 重置验证状态
-    function resetVerificationState() {
-        if (captureTimeout) {
-            clearTimeout(captureTimeout);
-            captureTimeout = null;
-        }
-        isVerifying = false;
-        statusText.textContent = '正在扫描...';
-    }
-
-    // 启动摄像头
+    // 打开摄像头
     async function startCamera() {
         try {
-            stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            videoElement.srcObject = stream;
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: 640,
+                    height: 480,
+                    facingMode: "user"
+                }
+            });
+            video.srcObject = stream;
             
-            videoElement.onloadedmetadata = () => {
-                videoElement.play();
-                // 3秒后自动捕捉
-                captureTimeout = setTimeout(() => {
-                    if (!isVerifying) {
-                        captureAndVerify();
-                    }
-                }, 3000);
-            };
+            // 3秒后自动拍照并发送
+            setTimeout(captureAndVerify, 3000);
         } catch (err) {
             console.error('摄像头访问失败:', err);
-            closeFaceRecognitionModal();
+            statusText.textContent = '无法访问摄像头';
+            setTimeout(closeModal, 2000);
         }
     }
 
-    // 停止摄像头
-    function stopCamera() {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-            stream = null;
-            videoElement.srcObject = null;
+    // 拍照并发送到后端验证
+    async function captureAndVerify() {
+        try {
+            // 创建canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            
+            // 在canvas上绘制视频帧，需要翻转回来
+            ctx.scale(-1, 1); // 水平翻转
+            ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+            ctx.scale(-1, 1); // 恢复变换
+            
+            // 将canvas内容转换为blob
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+            
+            // 创建FormData
+            const formData = new FormData();
+            formData.append('file', blob, 'face.jpg');
+            
+            console.log('准备发送人脸识别请求');
+            statusText.textContent = '正在验证...';
+            
+            // 发送到后端
+            const response = await fetch('/api/face-recognition/verify', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            console.log('识别结果:', result);
+            
+            if (result.code === 200 && result.data === true) {
+                // 识别成功
+                handleSuccess();
+            } else {
+                // 识别失败
+                statusText.textContent = result.message || '识别失败，请重试';
+                setTimeout(closeModal, 2000);
+            }
+        } catch (err) {
+            console.error('识别过程出错:', err);
+            statusText.textContent = '识别失败，请重试';
+            setTimeout(closeModal, 2000);
         }
     }
 
-    // 捕捉图片并验证
-    function captureAndVerify() {
-        if (isVerifying) return;
-        isVerifying = true;
-
-        if (!videoElement.videoWidth || !videoElement.videoHeight) {
-            console.error('视频未准备就绪');
-            isVerifying = false;
-            return;
-        }
-
-        console.log('开始人脸捕捉和验证');
-        statusText.textContent = '验证中...';
+    // 处理识别成功
+    function handleSuccess() {
+        console.log('处理识别成功');
+        // 关闭摄像头模态框
+        closeModal();
         
-        const canvas = document.createElement('canvas');
-        canvas.width = videoElement.videoWidth;
-        canvas.height = videoElement.videoHeight;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-        
-        // 模拟验证过程
+        // 显示成功提示
+        successModal.style.display = 'flex';
+        // 添加show类来触发动画
         setTimeout(() => {
-            closeFaceRecognitionModal();
-            // 确保人脸识别模态框完全关闭后再显示成功提示
-            setTimeout(() => {
-                showSuccessModal();
-            }, 300);
-        }, 1000);
-    }
-
-    // 显示成功提示
-    function showSuccessModal() {
-        console.log('显示成功提示');
-        // 隐藏验证按钮
-        verifyButton.style.opacity = '0';
-        verifyButton.style.visibility = 'hidden';
+            successModal.classList.add('show');
+        }, 10);
         
-        // 显示成功提示框
-        successModal.classList.add('show');
+        // 播放开门动画
+        playDoorAnimation();
         
-        // 3秒后隐藏成功提示并打开门
+        // 3秒后关闭成功提示
         setTimeout(() => {
             successModal.classList.remove('show');
-            // 等待提示框消失的过渡动画完成后打开门
             setTimeout(() => {
-                openDoors();
-            }, 300);
+                successModal.style.display = 'none';
+            }, 300); // 等待动画完成
         }, 3000);
     }
 
-    // 打开门动画
-    function openDoors() {
-        console.log('打开门');
-        leftDoor.classList.add('open');
-        rightDoor.classList.add('open');
+    // 关闭模态框
+    function closeModal() {
+        modal.style.display = 'none';
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    // 播放开门动画
+    function playDoorAnimation() {
+        const leftDoor = document.querySelector('.left-door');
+        const rightDoor = document.querySelector('.right-door');
         
+        // 使用GSAP动画库
+        gsap.to(leftDoor, {
+            left: '-50%',
+            duration: 1,
+            ease: 'power2.out'
+        });
+        
+        gsap.to(rightDoor, {
+            right: '-50%',
+            duration: 1,
+            ease: 'power2.out'
+        });
+        
+        // 5秒后关门
         setTimeout(() => {
-            closeDoors();
+            gsap.to(leftDoor, {
+                left: '0',
+                duration: 1,
+                ease: 'power2.inOut'
+            });
+            
+            gsap.to(rightDoor, {
+                right: '0',
+                duration: 1,
+                ease: 'power2.inOut'
+            });
         }, 5000);
     }
 
-    // 关闭门动画
-    function closeDoors() {
-        console.log('关闭门');
-        leftDoor.classList.remove('open');
-        rightDoor.classList.remove('open');
-        
-        setTimeout(() => {
-            verifyButton.style.opacity = '1';
-            verifyButton.style.visibility = 'visible';
-            resetVerificationState();
-        }, 1500);
-    }
-
-    // 事件监听器
-    verifyButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!isVerifying) {
-            openFaceRecognitionModal();
-        }
+    // 事件监听
+    verifyButton.addEventListener('click', () => {
+        console.log('点击验证按钮');
+        modal.style.display = 'flex';  // 使用flex而不是block
+        startCamera();
     });
 
-    closeModalButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        closeFaceRecognitionModal();
-        resetVerificationState();
+    closeButton.addEventListener('click', () => {
+        console.log('点击关闭按钮');
+        closeModal();
     });
 
-    // 点击模态框背景关闭
-    faceRecognitionModal.addEventListener('click', (e) => {
-        if (e.target === faceRecognitionModal) {
-            closeFaceRecognitionModal();
-            resetVerificationState();
-        }
-    });
-
-    // ESC键关闭模态框
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && faceRecognitionModal.classList.contains('show')) {
-            closeFaceRecognitionModal();
-            resetVerificationState();
+    // 点击模态框外部关闭
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            console.log('点击模态框外部');
+            closeModal();
         }
     });
 

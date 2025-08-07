@@ -247,14 +247,11 @@ body {
 /* 扫描区域样式 */
 .face-scan-area {
     width: 100%;
-    max-width: 400px;
     height: 300px;
     position: relative;
-    border-radius: 10px;
     overflow: hidden;
-    background: rgba(0, 168, 255, 0.1);
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 0 20px var(--glow-color);
+    border-radius: 8px;
+    background: #000;
 }
 
 #videoElement {
@@ -262,9 +259,6 @@ body {
     height: 100%;
     object-fit: cover;
     transform: scaleX(-1);
-    position: absolute;
-    top: 0;
-    left: 0;
 }
 
 .scan-overlay {
@@ -387,41 +381,41 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1100;
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 3000; /* 确保在最上层 */
-    opacity: 0;
-    transition: opacity 0.3s ease;
 }
 
 .success-modal .modal-content {
-    background: linear-gradient(45deg, #2c3e50, #34495e);
+    background: #2c3e50;
     padding: 30px;
-    border-radius: 20px;
+    border-radius: 15px;
     text-align: center;
-    border: 2px solid var(--primary-color);
-    box-shadow: 0 0 30px var(--glow-color);
-    transform: scale(0.9);
-    transition: transform 0.3s ease;
+    border: 2px solid #2ecc71;
+    box-shadow: 0 0 30px rgba(46, 204, 113, 0.5);
+    transform: scale(0.8);
+    opacity: 0;
+    transition: all 0.3s ease-out;
 }
 
 .success-modal.show {
-    opacity: 1;
     display: flex;
 }
 
 .success-modal.show .modal-content {
     transform: scale(1);
+    opacity: 1;
 }
 
 .success-modal .success-icon {
     width: 80px;
     height: 80px;
     margin: 0 auto 20px;
+    position: relative;
 }
 
 .success-modal .success-icon svg {
@@ -431,46 +425,32 @@ body {
 
 .success-modal .success-circle {
     fill: none;
-    stroke: var(--primary-color);
+    stroke: #2ecc71;
     stroke-width: 3;
     stroke-dasharray: 180;
     stroke-dashoffset: 180;
-    animation: drawCircle 1s ease forwards;
+    animation: drawCircle 1s ease-out forwards;
 }
 
 .success-modal .success-check {
     fill: none;
-    stroke: var(--primary-color);
+    stroke: #2ecc71;
     stroke-width: 3;
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
-    animation: drawCheck 0.8s ease forwards 0.6s;
+    animation: drawCheck 0.5s ease-out 0.8s forwards;
 }
 
 .success-modal h2 {
-    color: var(--primary-color);
+    color: #fff;
     margin: 0 0 10px;
     font-size: 24px;
-    text-shadow: 0 0 10px var(--glow-color);
 }
 
 .success-modal p {
-    color: #fff;
+    color: #bdc3c7;
     margin: 0;
     font-size: 16px;
-    opacity: 0.8;
-}
-
-@keyframes drawCircle {
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-@keyframes drawCheck {
-    to {
-        stroke-dashoffset: 0;
-    }
 }
 
 /* 动画关键帧 */
@@ -581,31 +561,28 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: none;
     justify-content: center;
     align-items: center;
-    z-index: 2000;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
 }
 
 .face-recognition-modal.show {
-    opacity: 1;
-    visibility: visible;
+    display: flex;
 }
 
 .face-recognition-modal .modal-content {
-    background: linear-gradient(45deg, #2c3e50, #34495e);
-    border-radius: 20px;
-    padding: 30px;
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 10px;
     width: 90%;
-    max-width: 600px;
+    max-width: 500px;
+    position: relative;
     border: 2px solid var(--primary-color);
-    box-shadow: 0 0 30px var(--glow-color);
+    box-shadow: 0 0 20px var(--glow-color);
 }
 
 .modal-header {
@@ -616,32 +593,27 @@ body {
 }
 
 .modal-header h2 {
-    color: var(--primary-color);
+    color: #fff;
     margin: 0;
-    font-size: 24px;
-    text-shadow: 0 0 10px var(--glow-color);
+    font-size: 1.5em;
 }
 
 .close-button {
-    background: transparent;
+    background: none;
     border: none;
+    color: #fff;
     cursor: pointer;
     padding: 5px;
-    width: 30px;
-    height: 30px;
 }
 
 .close-button svg {
-    width: 100%;
-    height: 100%;
-    fill: var(--primary-color);
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
 }
 
 .modal-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
+    position: relative;
 }
 
 /* 动画关键帧 */
@@ -699,19 +671,15 @@ body {
 /* 验证状态样式 */
 .verification-status {
     margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    text-align: center;
+    color: #fff;
 }
 
 .status-icon {
     width: 40px;
     height: 40px;
+    margin: 0 auto 10px;
     position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .scanning-circle {
@@ -719,54 +687,38 @@ body {
     height: 100%;
     border: 3px solid var(--primary-color);
     border-radius: 50%;
-    position: absolute;
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-.scanning-circle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 70%;
-    height: 70%;
-    background: var(--primary-color);
-    border-radius: 50%;
-    opacity: 0.3;
-    animation: glow 1.5s ease-in-out infinite;
+    animation: pulse 1.5s infinite;
 }
 
 .status-text {
-    color: var(--primary-color);
-    font-size: 18px;
-    text-shadow: 0 0 10px var(--glow-color);
+    font-size: 16px;
+    color: #fff;
 }
 
 @keyframes pulse {
     0% {
-        transform: scale(0.95);
+        transform: scale(0.8);
         opacity: 0.5;
     }
     50% {
-        transform: scale(1.05);
-        opacity: 1;
+        transform: scale(1.1);
+        opacity: 0.8;
     }
     100% {
-        transform: scale(0.95);
+        transform: scale(0.8);
         opacity: 0.5;
     }
 }
 
-@keyframes glow {
-    0% {
-        opacity: 0.3;
+@keyframes drawCircle {
+    to {
+        stroke-dashoffset: 0;
     }
-    50% {
-        opacity: 0.6;
-    }
-    100% {
-        opacity: 0.3;
+}
+
+@keyframes drawCheck {
+    to {
+        stroke-dashoffset: 0;
     }
 }
 
