@@ -48,3 +48,8 @@ face:
   image:
     upload:
       path: D:/laboratory/face-images
+
+# 百度人脸识别配置
+baidu:
+  face:
+    access-token: "24.1707af07b45ca7198a5a78ddd69f76ae.2592000.1754443880.282335-119434658"  # 替换为实际的百度云访问令牌
