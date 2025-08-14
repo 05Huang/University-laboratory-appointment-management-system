@@ -214,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeModal = document.getElementById('closeModal');
     const videoElement = document.getElementById('videoElement');
     const successModal = document.getElementById('successModal');
+    const failureModal = document.getElementById('failureModal');
     const leftDoor = document.querySelector('.left-door');
     const rightDoor = document.querySelector('.right-door');
 
@@ -292,6 +293,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // 显示成功提示
             successModal.style.display = 'flex';
             successModal.style.opacity = '1';
+            successModal.classList.add('show');
             
             // 播放开门动画
             setTimeout(() => {
@@ -303,6 +305,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     leftDoor.style.transform = 'translateX(0)';
                     rightDoor.style.transform = 'translateX(0)';
                     successModal.style.opacity = '0';
+                    successModal.classList.remove('show');
                     setTimeout(() => {
                         successModal.style.display = 'none';
                     }, 500);
@@ -310,19 +313,20 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 1500);
         } else {
             // 显示失败提示
-            const failureModal = document.createElement('div');
-            failureModal.className = 'failure-modal';
-            failureModal.innerHTML = `
-                <div class="modal-content">
-                    <div class="failure-icon">❌</div>
-                    <h2>验证失败</h2>
-                    <p>请重试或联系管理员</p>
-                </div>
-            `;
-            document.body.appendChild(failureModal);
+            failureModal.style.display = 'flex';
+            failureModal.style.opacity = '1';
+            failureModal.classList.add('show');
             
+            // 2秒后隐藏失败提示
             setTimeout(() => {
-                failureModal.remove();
+                failureModal.style.opacity = '0';
+                failureModal.classList.remove('show');
+                setTimeout(() => {
+                    failureModal.style.display = 'none';
+                    // 重新打开摄像头，继续识别
+                    faceRecognitionModal.style.display = 'flex';
+                    startCamera();
+                }, 500);
             }, 2000);
         }
     }
