@@ -142,7 +142,13 @@
                 title: '编号'
             }, {
                 field: 'image',
-                title: '照片'
+                title: '照片',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        return '<img src="' + value + '" style="max-width: 100px; max-height: 100px;" class="img-thumbnail" onclick="window.open(this.src)" />';
+                    }
+                    return '<img src="/images/img-placeholder.png" style="max-width: 100px; max-height: 100px;" class="img-thumbnail" />';
+                }
             }, {
                 field: 'laboratoryName',
                 title: '名称'
