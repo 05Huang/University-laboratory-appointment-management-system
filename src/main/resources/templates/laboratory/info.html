@@ -154,13 +154,17 @@
                 valign: 'middle',
                 checkbox: true,
             }, {
-                field: 'id',
+                field: 'index',
+                title: '序号',
                 align: 'center',
-                valign: 'middle',
-                title: '编号'
+                formatter: function (value, row, index) {
+                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
+                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
+                    return pageSize * (pageNumber - 1) + index + 1;
+                }
             }, {
                 field: 'laboratoryName',
-                title: '名称'
+                title: '实验室名称'
             }, {
                 field: 'deptName',
                 title: '所属部门'
