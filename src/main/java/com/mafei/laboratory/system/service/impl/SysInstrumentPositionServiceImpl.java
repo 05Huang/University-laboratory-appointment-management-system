@@ -8,13 +8,14 @@ import com.mafei.laboratory.system.entity.vo.InstrumentVo;
 import com.mafei.laboratory.system.entity.vo.PositionVo;
 import com.mafei.laboratory.system.entity.vo.RepairVo;
 import com.mafei.laboratory.system.repository.SysInstrumentPositionRepository;
+import com.mafei.laboratory.system.repository.SysInstrumentRepository;
 import com.mafei.laboratory.system.service.SysInstrumentPositionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,10 +27,10 @@ import java.util.Set;
  * @since 2021-03-10 08:48:34
  */
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class SysInstrumentPositionServiceImpl implements SysInstrumentPositionService {
     private final SysInstrumentPositionRepository positionRepository;
+    private final SysInstrumentRepository instrumentRepository;
 
     @Override
     public List<PositionVo> findAll() {
@@ -39,7 +40,9 @@ public class SysInstrumentPositionServiceImpl implements SysInstrumentPositionSe
             PositionVo positionVo = new PositionVo();
             BeanUtils.copyProperties(use, positionVo);
             String name = positionRepository.getName(use.getId());
+            String image = instrumentRepository.getImage(use.getInstrumentId());
             positionVo.setInstrumentName(name);
+            positionVo.setImage(image);
             list.add(positionVo);
         }
         return list;
@@ -52,54 +55,55 @@ public class SysInstrumentPositionServiceImpl implements SysInstrumentPositionSe
 
     @Override
     public SysInstrumentPosition queryById(Long id) {
-        return positionRepository.findById(id).get();
+        return positionRepository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional
     public void insert(PositionVo positionVo) {
-        try {
-            SysInstrumentPosition position = new SysInstrumentPosition();
-            position.setId(positionVo.getId());
-            position.setInstrumentId(positionVo.getInstrumentId());
-            position.setPosition(positionVo.getPosition());
-            position.setDetailNumber(positionVo.getDetailNumber());
-            position.setRepairPosition(positionVo.getRepairPosition());
-            position.setComment(positionVo.getComment());
-            position.setCreateBy("admin");
-            position.setCreateTime(DateUtils.getDate());
-            positionRepository.save(position);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SysInstrumentPosition position = new SysInstrumentPosition();
+        position.setId(positionVo.getId());
+        position.setInstrumentId(positionVo.getInstrumentId());
+        position.setPosition(positionVo.getPosition());
+        position.setDetailNumber(positionVo.getDetailNumber());
+        position.setRepairPosition(positionVo.getRepairPosition());
+        position.setComment(positionVo.getComment());
+        position.setCreateBy("admin");
+        position.setCreateTime(DateUtils.getDate());
+        positionRepository.save(position);
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         positionRepository.deleteById(id);
     }
 
     @Override
+    @Transactional
     public void deleteByIds(Set<Long> ids) {
-        try {
-            positionRepository.deleteByIds(ids);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        positionRepository.deleteByIds(ids);
     }
 
     @Override
+    @Transactional
     public void update(PositionVo positionVo) {
-        try {
-            SysInstrumentPosition position = positionRepository.findById(positionVo.getId()).get();
-            position.setId(positionVo.getId());
-            position.setPosition(positionVo.getPosition());
-            position.setDetailNumber(positionVo.getDetailNumber());
-            position.setComment(positionVo.getComment());
-            position.setCreateBy("admin");
-            position.setUpdateTime(DateUtils.getDate());
-            positionRepository.save(position);
-        } catch (Exception e) {
-            e.printStackTrace();
+        // 验证 ID 字段
+        if (positionVo.getId() == null) {
+            throw new IllegalArgumentException("设备位置 ID 不能为空");
         }
+        
+        // 检查记录是否存在
+        SysInstrumentPosition position = positionRepository.findById(positionVo.getId())
+                .orElseThrow(() -> new RuntimeException("设备位置记录不存在"));
+        
+        // 更新字段
+        position.setPosition(positionVo.getPosition());
+        position.setDetailNumber(positionVo.getDetailNumber());
+        position.setComment(positionVo.getComment());
+        position.setUpdateTime(DateUtils.getDate());
+        
+        // 保存更新
+        positionRepository.save(position);
     }
 }

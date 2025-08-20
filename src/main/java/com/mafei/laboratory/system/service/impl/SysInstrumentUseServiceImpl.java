@@ -28,6 +28,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SysInstrumentUseServiceImpl implements SysInstrumentUseService {
     private final SysInstrumentUseRepository useRepository;
+    private final SysInstrumentRepository instrumentRepository;
 
     @Override
     public List<UseVo> findAll() {
@@ -37,8 +38,9 @@ public class SysInstrumentUseServiceImpl implements SysInstrumentUseService {
             UseVo useVo = new UseVo();
             BeanUtils.copyProperties(use, useVo);
             String name = useRepository.getName(use.getId());
+            String image= instrumentRepository.getImage(use.getInstrumentId());
             useVo.setInstrumentName(name);
-
+            useVo.setImage(image);
             list.add(useVo);
         }
         return list;
@@ -73,23 +75,51 @@ public class SysInstrumentUseServiceImpl implements SysInstrumentUseService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
-        useRepository.deleteById(id);
-    }
-
-    @Override
-    public void deleteByIds(Set<Long> ids) {
+        if (id == null) {
+            throw new IllegalArgumentException("设备用途 ID 不能为空");
+        }
+        
         try {
-            useRepository.deleteByIds(ids);
+            useRepository.deleteById(id);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("删除设备用途失败: " + e.getMessage());
         }
     }
 
     @Override
-    public void update(UseVo useVo) {
+    @Transactional
+    public void deleteByIds(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new IllegalArgumentException("设备用途 ID 列表不能为空");
+        }
+        
+        if (ids.contains(null)) {
+            throw new IllegalArgumentException("设备用途 ID 列表包含无效ID");
+        }
+        
         try {
-            SysInstrumentUse instrumentUse = useRepository.findById(useVo.getId()).get();
+            useRepository.deleteByIds(ids);
+        } catch (Exception e) {
+            throw new RuntimeException("批量删除设备用途失败: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void update(UseVo useVo) {
+        // 验证 ID 字段
+        if (useVo.getId() == null) {
+            throw new IllegalArgumentException("设备用途 ID 不能为空");
+        }
+        
+        try {
+            // 检查记录是否存在
+            SysInstrumentUse instrumentUse = useRepository.findById(useVo.getId())
+                    .orElseThrow(() -> new RuntimeException("设备用途记录不存在"));
+            
+            // 更新字段
             instrumentUse.setInstrumentId(useVo.getInstrumentId());
             instrumentUse.setUseDesc(useVo.getUseDesc());
             instrumentUse.setUseTitle(useVo.getUseTitle());
@@ -99,7 +129,7 @@ public class SysInstrumentUseServiceImpl implements SysInstrumentUseService {
 
             useRepository.save(instrumentUse);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("更新设备用途失败: " + e.getMessage());
         }
     }
 

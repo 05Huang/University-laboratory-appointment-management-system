@@ -34,6 +34,11 @@
               <input type="number" name="price" class="form-control" id="phonenumber">
             </div>
             <div class="form-group">
+              <label for="image" class="control-label">设备图片：</label>
+              <input type="file" name="image" class="form-control" id="image" accept="image/*">
+              <img id="preview-image" src="" style="max-width: 200px; margin-top: 10px; display: none;">
+            </div>
+            <div class="form-group">
               <div class="example-box">
                 <label class="lyear-radio radio-inline radio-primary">
                   <input type="radio" checked="" name="type" value="0"><span>常规设备</span>
@@ -94,6 +99,11 @@
             <div class="form-group">
               <label for="price" class="control-label">价格：</label>
               <input type="number" name="price" id="price" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="add-image" class="control-label">设备图片：</label>
+              <input type="file" name="image" class="form-control" id="add-image" accept="image/*">
+              <img id="add-preview-image" src="" style="max-width: 200px; margin-top: 10px; display: none;">
             </div>
             <div class="form-group">
               <div class="example-box">
@@ -271,175 +281,94 @@
             return data
         }
 
-        $('#table').bootstrapTable({
-            url: '/api/instrument',                                     // 通过url 获取数据
-            showRefresh: true,                                    // 是否刷新按钮
-            sortStable: true,                                      // 是否支持排序
-            cache: false,                                          // 是否使用缓存
-            pagination: true,                                      // 是否显示分页
-            sidePagination: 'client',
-            searchAlign: 'right',
-            search: true,                                         // 是否有搜索框
-            pageNumber: 1,                                         // 首页页码，默认为1
-            pageSize: 10,
-            pageList: [10, 20, 30],//可选择单页记录数
-            onCheck: function (row) {
-                if (contains(row.id)) {
-                    idData.push(row.id);
+        // 图片预览功能
+        function previewImage(input, previewElement) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    $(previewElement).attr('src', e.target.result).show();
                 }
-                console.log(idData)
-            },
-            onUncheck: function (row) {
-                idData.forEach((item, index, arr) => {
-                    if (item === row.id) {
-                        arr.splice(index, 1);
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // 图片上传功能
+        function uploadImage(file) {
+            return new Promise((resolve, reject) => {
+                var formData = new FormData();
+                formData.append('file', file);
+
+                axios.post('/api/instrument/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
                     }
-                })
-                console.log(idData);
-            },
-            onCheckAll: function (rows) {
-                idData.splice(0, idData.length);
-                for (let i = 0; i < rows.length; i++) {
-                    idData.push(rows[i].id);
-                }
-                console.log(idData);
-            },
-            onUncheckAll: function (rows) {
-                idData.splice(0, idData.length);
-                console.log(idData)
-            },
-            columns: [{
-                name: 'check',
-                align: 'center',
-                valign: 'middle',
-                checkbox: true
-            }, {
-                field: 'index',
-                title: '序号',
-                align: 'center',
-                formatter: function (value, row, index) {
-                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
-                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
-                    return pageSize * (pageNumber - 1) + index + 1;
-                }
-            }, {
-                field: 'instrumentName',
-                title: '名称'
-            }, {
-                field: 'model',
-                title: '型号'
-            }, {
-                field: 'type',
-                title: '类型',
-                formatter: function (value, row, index) {
-                    if (row.status === '0') {
-                        return '<span class="label label-success">常规设备</span>'
-                    }
-                    if (row.status === '1') {
-                        return '<span class="label label-danger">购入设备</span>'
-                    }
-                    return '<span class="label label-info">捐赠设备</span>'
-                }
-            }, {
-                field: 'price',
-                title: '价格'
-            }, {
-                field: 'createBy',
-                title: '创建人'
-            }, {
-                field: 'status',
-                title: '状态',
-                formatter: function (value, row, index) {
-                    if (row.status === '0') {
-                        return '<span class="label label-success">空闲</span>'
-                    }
-                    if (row.status === '1') {
-                        return '<span class="label label-danger">废弃</span>'
-                    }
-                    if (row.status === '2') {
-                        return '<span class="label label-info">维修中</span>'
-                    }
-                    return '<span class="label label-purple">借用中</span>';
-                }
-            }, {
-                field: 'operate',
-                title: '操作',
-                align: 'center',
-                valign: 'middle',
-                width: 200,
-                events: {
-                    'click #edit': function (e, value, row, index) {
-                        $('#exampleModal').modal();
-                        $('#id').val(row.id);
-                        $('#name').val(row.instrumentName);
-                        $('#email').val(row.model);
-                        $('#phonenumber').val(row.price);
-                        $('#status').val(row.status);
-                        $('.modal-title').text('编辑：' + row.instrumentName);
-                    },
-                    'click #delete': function (e, value, row, index) {
-                        axios.delete('/api/instrument/' + row.id)
-                            .then(res => {
-                                lightyear.notify(res.data, 'success', 100);
-                                $('#table').bootstrapTable('refresh');
-                            }).catch(err => {
-                            lightyear.notify(err.response, 'danger', 100);
-                        });
-                    },
-                    'click #addPosition': function (e, value, row, index) {
-                        $('#addPositionModal').modal();
-                        $('#instrumentId').val(row.id);
-                        $('.modal-title').text('编辑：' + row.instrumentName);
-                    },
-                    'click #addUse': function (e, value, row, index) {
-                        $('#addUseModal').modal();
-                        $('#uinstrumentId').val(row.id);
-                        $('.modal-title').text('编辑：' + row.instrumentName);
-                    }
-                },
-                formatter: function (value, row, index) {
-                    let result = "";
-                    result += '<a class="btn btn-purple btn-xs" href="#!" id="addPosition" title="新增位置"><i class="mdi mdi-map-marker"></i> </a> ';
-                    result += '<a class="btn btn-brown btn-xs" href="#!" id="addUse" title="新增用途"><i class="mdi mdi-math-compass"></i></a> ';
-                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑" ><i class="mdi mdi-pencil"></i></a>';
-                    result += '<a class="btn btn-xs btn-default" id="delete" href="#!" title="删除"><i class="mdi mdi-window-close"></i></a>';
-                    return result;
-                }
-            }]
+                }).then(response => {
+                    resolve(response.data);
+                }).catch(error => {
+                    reject(error);
+                    lightyear.notify('图片上传失败：' + error.response.data, 'danger', 100);
+                });
+            });
+        }
+
+        // 编辑表单图片预览
+        $('#image').change(function() {
+            previewImage(this, '#preview-image');
         });
 
-        $('#exampleModal').on('show.bs.modal', function (event) {
-            var modal = $(this);
+        // 新增表单图片预览
+        $('#add-image').change(function() {
+            previewImage(this, '#add-preview-image');
         });
 
-        $('#updateBtn').off('click').on('click', function() {
-            let form = $("#updateForm").serializeObject();
-            form['id'] = $('#id').val();
-            console.log(form);
-            axios.put('/api/instrument', form).then(res => {
-                lightyear.notify(res.data, 'success', 100);
+        // 处理编辑表单提交
+        $('#updateBtn').off('click').on('click', async function() {
+            try {
+                let form = $("#updateForm").serializeObject();
+                form['id'] = $('#id').val();
+                
+                // 处理图片上传
+                const imageFile = $('#image')[0].files[0];
+                if (imageFile) {
+                    const imagePath = await uploadImage(imageFile);
+                    form.image = imagePath;
+                }
+
+                // 提交表单
+                await axios.put('/api/instrument', form);
+                lightyear.notify('更新成功', 'success', 100);
                 $('#exampleModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
-            }).catch(err => {
-                lightyear.notify(err.response.data.message, 'danger', 100);
-            })
+            } catch (err) {
+                lightyear.notify('更新失败：' + (err.response?.data?.message || err.message), 'danger', 100);
+            }
         });
 
-        $('#addModal').on('show.bs.modal', function (event) {
-            var modal = $(this);
-            modal.find('.modal-title').text('新增设备');
-        });
+        // 处理新增表单提交
+        $('#sureBtn').off('click').on('click', async function() {
+            try {
+                let form = $("#addForm").serializeObject();
+                console.log('表单初始数据:', form);
+                
+                // 处理图片上传
+                const imageFile = $('#add-image')[0].files[0];
+                if (imageFile) {
+                    console.log('开始上传图片:', imageFile.name);
+                    const imagePath = await uploadImage(imageFile);
+                    console.log('图片上传成功，路径:', imagePath);
+                    form.image = imagePath;
+                }
 
-        $('#sureBtn').off('click').on('click', function() {
-            let form = $("#addForm").serializeObject();
-            console.log(form);
-            axios.post('/api/instrument', form).then(res => {
-                lightyear.notify(res.data, 'success', 100);
+                console.log('最终提交的表单数据:', form);
+                // 提交表单
+                await axios.post('/api/instrument', form);
+                lightyear.notify('添加成功', 'success', 100);
                 $('#addModal').modal('hide');
                 $('#table').bootstrapTable('refresh');
-            }).catch(err => {
-                lightyear.notify(err.response.data.message, 'danger', 100);
-            })
+            } catch (err) {
+                console.error('提交失败:', err);
+                lightyear.notify('添加失败：' + (err.response?.data?.message || err.message), 'danger', 100);
+            }
         });
 
         $('#addBtn').off('click').on('click', function() {
@@ -530,6 +459,161 @@
                 lightyear.notify('删除失败' + err.response.message, 'danger', 100);
             });
         })
+
+        // 初始化表格
+        $('#table').bootstrapTable({
+            url: '/api/instrument',
+            showRefresh: true,
+            sortStable: true,
+            cache: false,
+            pagination: true,
+            sidePagination: 'client',
+            searchAlign: 'right',
+            search: true,
+            pageNumber: 1,
+            pageSize: 10,
+            pageList: [10, 20, 30],
+            onCheck: function (row) {
+                if (contains(row.id)) {
+                    idData.push(row.id);
+                }
+                console.log(idData)
+            },
+            onUncheck: function (row) {
+                idData.forEach((item, index, arr) => {
+                    if (item === row.id) {
+                        arr.splice(index, 1);
+                    }
+                })
+                console.log(idData);
+            },
+            onCheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                for (let i = 0; i < rows.length; i++) {
+                    idData.push(rows[i].id);
+                }
+                console.log(idData);
+            },
+            onUncheckAll: function (rows) {
+                idData.splice(0, idData.length);
+                console.log(idData)
+            },
+            columns: [{
+                name: 'check',
+                align: 'center',
+                valign: 'middle',
+                checkbox: true
+            }, {
+                field: 'index',
+                title: '序号',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var pageSize = $('#table').bootstrapTable('getOptions').pageSize;
+                    var pageNumber = $('#table').bootstrapTable('getOptions').pageNumber;
+                    return pageSize * (pageNumber - 1) + index + 1;
+                }
+            }, {
+                field: 'instrumentName',
+                title: '设备名'
+            }, {
+                field: 'image',
+                title: '设备图片',
+                width: 200,
+                align: 'center',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        // 确保使用绝对路径
+                        const imagePath = value.startsWith('/') ? value : '/' + value;
+                        console.log('图片路径:', imagePath); // 添加调试日志
+                        return '<img src="' + imagePath + '" style="max-width: 150px; max-height: 150px;" onerror="console.error(\'图片加载失败:\', this.src); this.onerror=null; this.src=\'/images/img-placeholder.png\';">';
+                    }
+                    return '无图片';
+                }
+            }, {
+                field: 'model',
+                title: '型号'
+            }, {
+                field: 'type',
+                title: '类型',
+                formatter: function (value, row, index) {
+                    if (value === '0') {
+                        return '常规设备';
+                    } else if (value === '1') {
+                        return '自制设备';
+                    } else if (value === '2') {
+                        return '捐赠设备';
+                    }
+                    return value;
+                }
+            }, {
+                field: 'status',
+                title: '状态',
+                formatter: function (value, row, index) {
+                    if (value === '0') {
+                        return '启用';
+                    } else if (value === '1') {
+                        return '禁用';
+                    }
+                    return value;
+                }
+            }, {
+                field: 'price',
+                title: '价格'
+            }, {
+                field: 'createTime',
+                title: '创建时间',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        const date = new Date(value);
+                        return date.getFullYear() + '-' + 
+                               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(date.getDate()).padStart(2, '0') + ' ' + 
+                               String(date.getHours()).padStart(2, '0') + ':' + 
+                               String(date.getMinutes()).padStart(2, '0') + ':' + 
+                               String(date.getSeconds()).padStart(2, '0');
+                    }
+                    return '-';
+                }
+            }, {
+                field: 'operate',
+                title: '操作',
+                align: 'center',
+                valign: 'middle',
+                width: 200,
+                events: {
+                    'click #edit': function (e, value, row, index) {
+                        $('#exampleModal').modal();
+                        $('.modal-title').text('编辑：' + row.instrumentName);
+                        $('#id').val(row.id);
+                        $('#name').val(row.instrumentName);
+                        $('#email').val(row.model);
+                        $('#phonenumber').val(row.price);
+                        if (row.image) {
+                            $('#preview-image').attr('src', row.image).show();
+                        }
+                        $('input[name="type"][value="' + row.type + '"]').prop('checked', true);
+                        $('input[name="status"][value="' + row.status + '"]').prop('checked', true);
+                    },
+                    'click #addPosition': function (e, value, row, index) {
+                        $('#addPositionModal').modal();
+                        $('.modal-title').text('添加位置：' + row.instrumentName);
+                        $('#instrumentId').val(row.id);
+                    },
+                    'click #addUse': function (e, value, row, index) {
+                        $('#addUseModal').modal();
+                        $('.modal-title').text('添加用途：' + row.instrumentName);
+                        $('#uinstrumentId').val(row.id);
+                    }
+                },
+                formatter: function (value, row, index) {
+                    let result = "";
+                    result += '<a class="btn btn-xs btn-default" id="edit" href="#!" title="编辑"><i class="mdi mdi-pencil"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="addPosition" href="#!" title="添加位置"><i class="mdi mdi-map-marker"></i></a>';
+                    result += '<a class="btn btn-xs btn-default" id="addUse" href="#!" title="添加用途"><i class="mdi mdi-file-document"></i></a>';
+                    return result;
+                }
+            }]
+        });
     });
 </script>
 </body>

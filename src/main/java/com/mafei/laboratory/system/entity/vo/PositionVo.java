@@ -20,4 +20,5 @@ public class PositionVo extends Instrument {
     private String detailNumber;
     private String repairPosition;
     private Date createTime;
+    private String image;  // 设备图片路径
 }

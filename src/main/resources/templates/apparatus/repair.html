@@ -118,6 +118,17 @@
                 field: 'instrumentName',
                 title: '设备名'
             }, {
+                field: 'image',
+                title: '设备图片',
+                width: 200,
+                align: 'center',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        return '<img src="' + value + '" style="max-width: 150px; max-height: 150px;">';
+                    }
+                    return '无图片';
+                }
+            }, {
                 field: 'repairPosition',
                 title: '维修位置'
             }, {
@@ -128,10 +139,34 @@
                 title: '备注'
             }, {
                 field: 'createTime',
-                title: '维修时间'
+                title: '维修时间',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        const date = new Date(value);
+                        return date.getFullYear() + '-' + 
+                               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(date.getDate()).padStart(2, '0') + ' ' + 
+                               String(date.getHours()).padStart(2, '0') + ':' + 
+                               String(date.getMinutes()).padStart(2, '0') + ':' + 
+                               String(date.getSeconds()).padStart(2, '0');
+                    }
+                    return '-';
+                }
             }, {
                 field: 'updateTime',
-                title: '预计维修完成时间'
+                title: '预计维修完成时间',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        const date = new Date(value);
+                        return date.getFullYear() + '-' + 
+                               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(date.getDate()).padStart(2, '0') + ' ' + 
+                               String(date.getHours()).padStart(2, '0') + ':' + 
+                               String(date.getMinutes()).padStart(2, '0') + ':' + 
+                               String(date.getSeconds()).padStart(2, '0');
+                    }
+                    return '-';
+                }
             }, {
                 field: 'operate',
                 title: '操作',
@@ -140,13 +175,17 @@
                 width: 200,
                 events: {
                     'click #delete': function (e, value, row, index) {
+                        if (!row.id) {
+                            lightyear.notify('维修记录ID不能为空', 'warning', 100);
+                            return;
+                        }
                         axios.delete('/api/repair/' + row.id)
                             .then(res => {
                                 lightyear.notify(res.data, 'success', 100);
                                 $('#table').bootstrapTable('refresh');
                             }).catch(err => {
-                            lightyear.notify(err.response, 'danger', 100);
-                        });
+                                lightyear.notify(err.response.data.message || '操作失败', 'danger', 100);
+                            });
                     }
                 },
                 formatter: function (value, row, index) {
@@ -168,6 +207,11 @@
                 lightyear.notify('请先选择要完成的维修单', 'warning', 100);
                 return;
             }
+            // 验证选中的记录是否都有有效的 ID
+            if (idData.some(id => !id)) {
+                lightyear.notify('存在无效的维修记录ID', 'warning', 100);
+                return;
+            }
             axios({
                 method: 'delete',
                 url: '/api/repair',
@@ -177,7 +221,7 @@
                 lightyear.notify('维修完成', 'success', 100);
                 $('#table').bootstrapTable('refresh');
             }).catch(err => {
-                lightyear.notify('操作失败' + err.response.message, 'danger', 100);
+                lightyear.notify(err.response.data.message || '操作失败', 'danger', 100);
             });
         });
     });

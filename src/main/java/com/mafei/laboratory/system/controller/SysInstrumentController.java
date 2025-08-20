@@ -7,9 +7,16 @@ import com.mafei.laboratory.system.service.dto.UpdateStatusDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * 仪器信息表(SysInstrument)表控制层
@@ -22,6 +29,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SysInstrumentController {
     private final SysInstrumentService instrumentService;
+    private static final String UPLOAD_DIR = "uploads/instruments/";
 
     @GetMapping
     public ResponseEntity<Object> findAll() {
@@ -31,6 +39,31 @@ public class SysInstrumentController {
     @GetMapping("/repair")
     public ResponseEntity<Object> findAllRepair() {
         return ResponseEntity.ok(instrumentService.findAllRepair());
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<Object> uploadImage(@RequestParam("file") MultipartFile file) {
+        try {
+            // 确保上传目录存在
+            File uploadDir = new File(UPLOAD_DIR);
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs();
+            }
+
+            // 生成唯一的文件名
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = UUID.randomUUID().toString() + extension;
+
+            // 保存文件
+            Path path = Paths.get(UPLOAD_DIR + filename);
+            Files.write(path, file.getBytes());
+
+            // 返回文件访问路径
+            return ResponseEntity.ok("/uploads/instruments/" + filename);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().body("文件上传失败：" + e.getMessage());
+        }
     }
 
     @PostMapping

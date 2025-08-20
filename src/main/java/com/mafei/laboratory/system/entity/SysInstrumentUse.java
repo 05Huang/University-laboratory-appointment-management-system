@@ -82,4 +82,6 @@ public class SysInstrumentUse implements Serializable {
     @Column(name = "update_time")
     private Date updateTime;
 
+
+
 }

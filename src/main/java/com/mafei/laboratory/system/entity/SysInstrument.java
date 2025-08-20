@@ -82,4 +82,10 @@ public class SysInstrument implements Serializable {
     @Column(name = "update_time")
     private Date updateTime;
 
+    /**
+     * 图片
+     */
+    @Column(name = "image")
+    private String image;
+
 }

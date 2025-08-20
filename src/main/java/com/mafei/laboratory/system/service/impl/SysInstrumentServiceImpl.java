@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +60,8 @@ public class SysInstrumentServiceImpl implements SysInstrumentService {
             sysInstrument.setStatus(instrumentVo.getStatus());
             sysInstrument.setPrice(instrumentVo.getPrice());
             sysInstrument.setCreateBy("admin");
+            sysInstrument.setImage(instrumentVo.getImage());
+            sysInstrument.setCreateTime(new Date());
             instrumentRepository.save(sysInstrument);
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,6 +92,7 @@ public class SysInstrumentServiceImpl implements SysInstrumentService {
             sysInstrument.setStatus(instrumentVo.getStatus());
             sysInstrument.setPrice(instrumentVo.getPrice());
             sysInstrument.setCreateBy("admin");
+            sysInstrument.setImage(instrumentVo.getImage());
             instrumentRepository.save(sysInstrument);
         } catch (Exception e) {
             e.printStackTrace();

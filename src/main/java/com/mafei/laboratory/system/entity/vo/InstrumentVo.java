@@ -19,4 +19,5 @@ public class InstrumentVo {
     private String status;
     private BigDecimal price;
     private String createBy;
+    private String image;  // 设备图片路径
 }

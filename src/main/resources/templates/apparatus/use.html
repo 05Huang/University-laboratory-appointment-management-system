@@ -19,7 +19,7 @@
           <form id="addUseForm">
             <div class="form-group">
               <label for="instrumentId" class="control-label">设备id：</label>
-              <input type="text" name="instrumentId" id="instrumentId" class="form-control" disabled="disabled">
+              <input type="text" name="instrumentId" id="instrumentId" class="form-control" readonly>
             </div>
             <div class="form-group">
               <label for="useTitle" class="control-label">用途名称：</label>
@@ -164,6 +164,17 @@
                 field: 'instrumentName',
                 title: '设备名'
             }, {
+                field: 'image',
+                title: '设备图片',
+                width: 200,
+                align: 'center',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        return '<img src="' + value + '" style="max-width: 150px; max-height: 150px;">';
+                    }
+                    return '无图片';
+                }
+            }, {
                 field: 'useTitle',
                 title: '用途名称'
             }, {
@@ -174,7 +185,19 @@
                 title: '类别'
             }, {
                 field: 'createTime',
-                title: '创建时间'
+                title: '创建时间',
+                formatter: function(value, row, index) {
+                    if (value) {
+                        const date = new Date(value);
+                        return date.getFullYear() + '-' + 
+                               String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                               String(date.getDate()).padStart(2, '0') + ' ' + 
+                               String(date.getHours()).padStart(2, '0') + ':' + 
+                               String(date.getMinutes()).padStart(2, '0') + ':' + 
+                               String(date.getSeconds()).padStart(2, '0');
+                    }
+                    return '-';
+                }
             }, {
                 field: 'operate',
                 title: '操作',
@@ -217,8 +240,10 @@
 
         $('#sureUseBtn').off('click').on('click', function() {
             let form = $("#addUseForm").serializeObject();
-            form['instrumentId'] = $('#instrumentId').val();
-            console.log(form);
+            form.id = $('#instrumentId').val();
+            form.instrumentId = $('#instrumentId').val();
+            console.log('提交的表单数据：', form);
+            
             axios.put('/api/use', form).then(res => {
                 lightyear.notify(res.data, 'success', 100);
                 $('#addUseModal').modal('hide');
