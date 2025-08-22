@@ -70,7 +70,7 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
         borrowInstrument.setUserId(borrowVo.getUserId());
         borrowInstrument.setLaboratoryId(borrowVo.getLaboratoryId());
         borrowInstrument.setStatus(borrowVo.getStatus());
-        borrowInstrument.setBorrowStatus(borrowVo.getBorrowStatus());
+        borrowInstrument.setBorrowStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setComment(borrowVo.getComment());
         borrowInstrument.setCreateBy(borrowVo.getUserName());
         borrowInstrument.setCreateTime(borrowVo.getCreateTime());
