@@ -42,6 +42,11 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
     }
 
     @Override
+    public List<BorrowLaboratoryVo> findAllReview() {
+        return repository.myFindAllReview();
+    }
+
+    @Override
     public List<BorrowLaboratoryVo> findAllByUserId(Long userId) {
         List<SysBorrowLaboratory> all = repository.findByUserId(userId);
         list = new LinkedList<>();
@@ -66,6 +71,7 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
 
     @Override
     public void insert(BorrowLaboratoryVo borrowVo) {
+        // 保存借用记录
         SysBorrowLaboratory borrowInstrument = new SysBorrowLaboratory();
         borrowInstrument.setUserId(borrowVo.getUserId());
         borrowInstrument.setLaboratoryId(borrowVo.getLaboratoryId());
@@ -75,8 +81,15 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
         borrowInstrument.setCreateBy(borrowVo.getUserName());
         borrowInstrument.setCreateTime(borrowVo.getCreateTime());
         borrowInstrument.setUpdateTime(new Date());
-
         repository.save(borrowInstrument);
+
+        // 更新实验室状态为审核中
+        try {
+            laboratoryRepository.updateStatus(borrowVo.getLaboratoryId(), StatusEnum.CHECK.getStatus());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "更新实验室状态失败");
+        }
     }
 
     @Override
@@ -167,6 +180,16 @@ public class SysBorrowLaboratoryServiceImpl implements SysBorrowLaboratoryServic
     @Override
     public Long countAllByStatus(String status) {
         return repository.countByBorrowStatus(status);
+    }
+
+    @Override
+    public long countAllByUserId(Long userId) {
+        return repository.countByUserId(userId);
+    }
+
+    @Override
+    public long countAllByUserIdAndStatus(Long userId, String status) {
+        return repository.countByUserIdAndBorrowStatus(userId, status);
     }
 
     private StatusEnum checkStatus(String status) {

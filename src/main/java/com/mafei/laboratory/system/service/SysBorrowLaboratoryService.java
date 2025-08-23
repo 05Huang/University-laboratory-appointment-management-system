@@ -24,6 +24,12 @@ public interface SysBorrowLaboratoryService {
     List<BorrowLaboratoryVo> findAll();
 
     /**
+     * 管理员查询审核中的
+     *
+     * @return
+     */
+    List<BorrowLaboratoryVo> findAllReview();
+    /**
      * 查询用户单据
      *
      * @param userId
@@ -94,4 +100,21 @@ public interface SysBorrowLaboratoryService {
     Long countAll();
 
     Long countAllByStatus(String status);
+
+    /**
+     * 统计用户的所有借用记录数量
+     *
+     * @param userId 用户ID
+     * @return 借用记录数量
+     */
+    long countAllByUserId(Long userId);
+
+    /**
+     * 统计用户特定状态的借用记录数量
+     *
+     * @param userId 用户ID
+     * @param status 状态
+     * @return 特定状态的借用记录数量
+     */
+    long countAllByUserIdAndStatus(Long userId, String status);
 }

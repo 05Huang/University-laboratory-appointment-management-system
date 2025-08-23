@@ -48,7 +48,7 @@ public interface SysInstrumentRepository extends JpaRepository<SysInstrument, Lo
      *
      * @return
      */
-    @Query(value = "SELECT * FROM sys_instrument WHERE status = '0'", nativeQuery = true)
+    @Query(value = "SELECT * FROM sys_instrument WHERE status in ('0', '8')", nativeQuery = true)
     List<SysInstrument> queryByStatus();
 
     /**

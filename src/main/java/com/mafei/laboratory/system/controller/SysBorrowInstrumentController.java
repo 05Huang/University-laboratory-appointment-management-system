@@ -27,6 +27,15 @@ public class SysBorrowInstrumentController {
         return ResponseEntity.ok(all);
     }
 
+    @GetMapping("/review")
+    public ResponseEntity<Object> findAllReview() {
+        List<BorrowInstrumentVo> all = instrumentService.findAllReview();
+        return ResponseEntity.ok(all);
+    }
+
+
+
+
     @GetMapping("/{userId}")
     public ResponseEntity<Object> findAllByUser(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok(instrumentService.findAllByUserId(userId));

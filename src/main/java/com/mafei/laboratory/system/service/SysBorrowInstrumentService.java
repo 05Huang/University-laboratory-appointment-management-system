@@ -22,6 +22,13 @@ public interface SysBorrowInstrumentService {
     List<BorrowInstrumentVo> findAll();
 
     /**
+     * 管理员查询待审核
+     *
+     * @return
+     */
+    List<BorrowInstrumentVo> findAllReview();
+
+    /**
      * 用户查询单据
      *
      * @param userId
@@ -98,4 +105,21 @@ public interface SysBorrowInstrumentService {
      * @return
      */
     Long countAllByStatus(String status);
+
+    /**
+     * 统计用户的所有借用记录数量
+     *
+     * @param userId 用户ID
+     * @return 借用记录数量
+     */
+    long countAllByUserId(Long userId);
+
+    /**
+     * 统计用户特定状态的借用记录数量
+     *
+     * @param userId 用户ID
+     * @param status 状态
+     * @return 特定状态的借用记录数量
+     */
+    long countAllByUserIdAndStatus(Long userId, String status);
 }

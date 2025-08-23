@@ -1,7 +1,6 @@
 package com.mafei.laboratory.system.repository;
 
 import com.mafei.laboratory.system.entity.SysBorrowInstrument;
-import com.mafei.laboratory.system.entity.SysBorrowInstrument;
 import com.mafei.laboratory.system.entity.vo.BorrowInstrumentVo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -54,9 +53,21 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
     @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowInstrumentVo( " +
             "a.id,a.userId,a.instrumentId,b.userName,c.instrumentName,a.status,a.borrowStatus,a.comment,a.createTime) " +
             " from SysBorrowInstrument as a,SysUser as b,SysInstrument as c " +
-            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5') " +
+            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5','8') " +
             " order by a.status,a.createTime desc")
     List<BorrowInstrumentVo> myFindAll();
+
+    /**
+     * 获取审核列表
+     *
+     * @return
+     */
+    @Query(value = "select new com.mafei.laboratory.system.entity.vo.BorrowInstrumentVo( " +
+            "a.id,a.userId,a.instrumentId,b.userName,c.instrumentName,a.status,a.borrowStatus,a.comment,a.createTime) " +
+            " from SysBorrowInstrument as a,SysUser as b,SysInstrument as c " +
+            " where a.userId = b.userId and a.instrumentId = c.id and a.status in ('7','1','4','5') " +
+            " order by a.status,a.createTime desc")
+    List<BorrowInstrumentVo> myFindAllReview();
 
 
     /**
@@ -99,9 +110,27 @@ public interface SysBorrowInstrumentRepository extends JpaRepository<SysBorrowIn
 
 
     /**
-     * 根据状态查询
-     * @param status
-     * @return
+     * 统计用户的所有借用记录数量
+     *
+     * @param userId 用户ID
+     * @return 借用记录数量
+     */
+    long countByUserId(Long userId);
+
+    /**
+     * 统计用户特定状态的借用记录数量
+     *
+     * @param userId 用户ID
+     * @param status 状态
+     * @return 特定状态的借用记录数量
+     */
+    long countByUserIdAndBorrowStatus(Long userId, String status);
+
+    /**
+     * 统计特定状态的借用记录数量
+     *
+     * @param status 状态
+     * @return 记录数量
      */
     Long countByBorrowStatus(String status);
 }

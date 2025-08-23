@@ -43,6 +43,11 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
     }
 
     @Override
+    public List<BorrowInstrumentVo> findAllReview() {
+        return repository.myFindAllReview();
+    }
+
+    @Override
     public List<BorrowInstrumentVo> findAllByUserId(Long userId) {
         List<SysBorrowInstrument> all = repository.findByUserId(userId);
         list = new LinkedList<>();
@@ -71,13 +76,18 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
         borrowInstrument.setUserId(borrowVo.getUserId());
         borrowInstrument.setInstrumentId(borrowVo.getInstrumentId());
         borrowInstrument.setStatus(borrowVo.getStatus());
-        borrowInstrument.setBorrowStatus(borrowVo.getBorrowStatus());
+        borrowInstrument.setBorrowStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setComment(borrowVo.getComment());
         borrowInstrument.setCreateBy(borrowVo.getUserName());
         borrowInstrument.setCreateTime(borrowVo.getCreateTime());
         borrowInstrument.setUpdateTime(new Date());
-
         repository.save(borrowInstrument);
+        try {
+            instrumentRepository.updateStatus(borrowVo.getInstrumentId(), StatusEnum.CHECK.getStatus());
+        }catch (Exception e) {
+            e.printStackTrace();
+            throw new BadRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "更新设备状态失败");
+        }
     }
 
     @Override
@@ -176,6 +186,16 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
     @Override
     public Long countAllByStatus(String status) {
         return repository.countByBorrowStatus(status);
+    }
+
+    @Override
+    public long countAllByUserId(Long userId) {
+        return repository.countByUserId(userId);
+    }
+
+    @Override
+    public long countAllByUserIdAndStatus(Long userId, String status) {
+        return repository.countByUserIdAndBorrowStatus(userId, status);
     }
 
     private StatusEnum checkStatus(String status) {
