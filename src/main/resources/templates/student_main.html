@@ -116,7 +116,7 @@
               <i class="mdi mdi-calendar-check"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number">2 件</h3>
+              <h3 class="stat-number" data-stat="totalBorrowed">0 件</h3>
               <p class="stat-label">总借用设备</p>
             </div>
           </div>
@@ -132,7 +132,7 @@
               <i class="mdi mdi-clipboard-alert"></i>
             </div>
             <div class="stat-content">
-              <h3 class="stat-number">1 件</h3>
+              <h3 class="stat-number" data-stat="notReturned">0 件</h3>
               <p class="stat-label">未归还设备</p>
             </div>
           </div>
@@ -166,7 +166,37 @@
 <script th:inline="javascript" type="text/javascript">
     $(function () {
         const idData = [];
-        const userId = [[${userId}]];
+        const userId = /*[[${userId}]]*/ '';
+
+        // 获取最新的统计数据
+        function fetchDashboardStats() {
+            console.log('Fetching student dashboard stats...');
+            axios.get('/api/dashboard/student/' + userId, {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            })
+            .then(function(response) {
+                console.log('Received student dashboard stats:', response.data);
+                if (response.data) {
+                    // 更新卡片数据
+                    document.querySelector('[data-stat="totalBorrowed"]').textContent = response.data.totalBorrowed + ' 件';
+                    document.querySelector('[data-stat="notReturned"]').textContent = response.data.notReturned + ' 件';
+                }
+            })
+            .catch(function(error) {
+                console.error('获取统计数据失败:', error);
+            });
+        }
+
+        // 页面加载完成后启动自动刷新
+        console.log('Page loaded, starting auto-refresh...');
+        // 立即执行一次
+        fetchDashboardStats();
+        // 每30秒刷新一次
+        setInterval(fetchDashboardStats, 30000);
 
         function contains(id) {
             for (let datum of idData) {
