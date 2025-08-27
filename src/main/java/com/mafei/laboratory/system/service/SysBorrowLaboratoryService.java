@@ -5,6 +5,8 @@ import com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo;
 import com.mafei.laboratory.system.entity.vo.BorrowLaboratoryVo;
 import com.mafei.laboratory.system.service.dto.UpdateDto;
 
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Set;
 
@@ -117,4 +119,20 @@ public interface SysBorrowLaboratoryService {
      * @return 特定状态的借用记录数量
      */
     long countAllByUserIdAndStatus(Long userId, String status);
+
+    /**
+     * 统计指定日期的借用记录数量
+     *
+     * @param date 日期
+     * @return 借用记录数量
+     */
+    long countAllByDate(LocalDate date);
+
+    /**
+     * 统计指定年月的借用记录数量
+     *
+     * @param yearMonth 年月
+     * @return 借用记录数量
+     */
+    long countAllByYearMonth(YearMonth yearMonth);
 }

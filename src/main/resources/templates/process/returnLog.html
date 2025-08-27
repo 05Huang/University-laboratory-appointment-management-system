@@ -72,7 +72,7 @@
                 field: 'status',
                 title: '状态',
                 formatter: function (value, row, index) {
-                    if (row.status === '0'||row.status === '8') {
+                    if (row.status === '0'||row.status === '8'||row.status === '4') {
                         return '<span class="label label-success">空闲</span>'
                     }
                     if (row.status === '1') {
@@ -103,7 +103,19 @@
                 }
             }, {
                 field: 'createTime',
-                title: '日志事件'
+                title: '日志时间',
+                formatter: function(value, row, index) {
+                    if (!value) return '';
+                    // 将ISO格式的时间字符串转换为Date对象
+                    var date = new Date(value);
+                    // 格式化为 "YYYY-MM-DD HH:mm:ss" 格式
+                    return date.getFullYear() + '-' + 
+                           String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(date.getDate()).padStart(2, '0') + ' ' + 
+                           String(date.getHours()).padStart(2, '0') + ':' + 
+                           String(date.getMinutes()).padStart(2, '0') + ':' + 
+                           String(date.getSeconds()).padStart(2, '0');
+                }
             }]
         })
     });
