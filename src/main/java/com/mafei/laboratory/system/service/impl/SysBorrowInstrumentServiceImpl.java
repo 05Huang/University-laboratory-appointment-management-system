@@ -78,7 +78,7 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
         SysBorrowInstrument borrowInstrument = new SysBorrowInstrument();
         borrowInstrument.setUserId(borrowVo.getUserId());
         borrowInstrument.setInstrumentId(borrowVo.getInstrumentId());
-        borrowInstrument.setStatus(borrowVo.getStatus());
+        borrowInstrument.setStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setBorrowStatus(StatusEnum.CHECK.getStatus());
         borrowInstrument.setComment(borrowVo.getComment());
         borrowInstrument.setCreateBy(borrowVo.getUserName());
@@ -137,11 +137,14 @@ public class SysBorrowInstrumentServiceImpl implements SysBorrowInstrumentServic
             StatusEnum statusEnum = checkStatus(updateDto.getStatus());
 
             String status = "";
+            System.out.println(updateDto.getStatus());
             if (updateDto.getStatus().equals("8")) {
                 status = updateDto.getStatus();
             } else if (updateDto.getStatus().equals("4")) {
                 status = updateDto.getStatus();
-            } else {
+            }else if(updateDto.getStatus().equals("6"))
+                status = updateDto.getStatus();
+            else {
                 status = statusEnum.getStatus();
             }
 

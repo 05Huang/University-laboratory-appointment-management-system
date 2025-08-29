@@ -21,7 +21,7 @@ public enum StatusEnum {
 
     CHECK("5", "审核中"),
 
-    SUCCESS("6", "成功"),
+    SUCCESS("6", "审核通过"),
 
     BORROW("7", "使用中"),
 

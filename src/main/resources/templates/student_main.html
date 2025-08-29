@@ -298,6 +298,9 @@
                     if (row.borrowStatus === '5') {
                         return '<span class="label label-warning">审核中</span>'
                     }
+                    if (row.borrowStatus === '8') {
+                        return '<span class="label label-danger">已归还</span>'
+                    }
                     return '<span class="label label-success">审核通过</span>';
                 }
             }, {
@@ -326,6 +329,10 @@
                             lightyear.notify('该设备还在审核中', 'danger', 100);
                             return;
                         }
+                        if (row.borrowStatus === '8') {
+                            lightyear.notify('该设备已归还过了', 'danger', 100);
+                            return;
+                        }
                         let data = {};
                         data.status = '8';
                         data.id = row.id;
@@ -346,6 +353,10 @@
                         }
                         if (row.borrowStatus === '7') {
                             lightyear.notify('该设备已经在使用中了', 'danger', 100);
+                            return;
+                        }
+                        if (row.borrowStatus === '8') {
+                            lightyear.notify('该设备已归还过了', 'danger', 100);
                             return;
                         }
 

@@ -1,5 +1,6 @@
 package com.mafei.laboratory.system.service.impl;
 
+import com.mafei.laboratory.commons.enums.StatusEnum;
 import com.mafei.laboratory.commons.exception.BadRequestException;
 import com.mafei.laboratory.system.entity.SysLaboratory;
 import com.mafei.laboratory.system.entity.vo.LaboratoryVo;
@@ -46,6 +47,7 @@ public class SysLaboratoryServiceImpl implements SysLaboratoryService {
         laboratory.setTarget(laboratoryVo.getTarget());
         laboratory.setDepotId(laboratoryVo.getDepotId());
         laboratory.setCapacity(laboratoryVo.getCapacity());
+        laboratory.setStatus(StatusEnum.NORMAL.getStatus());
         laboratory.setImage(laboratoryVo.getImage());
         laboratory.setAdmin("admin");
         laboratoryRepository.save(laboratory);
