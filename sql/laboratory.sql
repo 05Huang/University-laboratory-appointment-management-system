@@ -172,7 +172,7 @@ CREATE TABLE `sys_instrument_repair`  (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '仪器id',
   `instrument_id` bigint(20) NOT NULL,
   `status` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '0' COMMENT '（0代表存在 1代表启用）',
-  `price` decimal(6, 3) NULL DEFAULT NULL,
+  `price` decimal(10, 2) NULL DEFAULT NULL,
   `repair_position` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '学校维修部',
   `comment` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '备注',
   `create_by` varchar(64) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '创建者',

@@ -16,6 +16,12 @@ spring:
   web:
     resources:
       static-locations: classpath:/static/,file:uploads/
+  servlet:
+    multipart:
+      # 单个文件大小限制
+      max-file-size: 10MB
+      # 总上传数据大小限制
+      max-request-size: 20MB
 
   # 数据库配置
   datasource:
