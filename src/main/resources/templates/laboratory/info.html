@@ -34,6 +34,14 @@
               <input type="text" name="target" class="form-control" id="target">
             </div>
             <div class="form-group">
+              <label for="image" class="control-label">实验室图片：</label>
+              <input type="file" name="image" class="form-control" id="image" accept="image/*" onchange="previewImage(this)">
+              <div id="imagePreview" style="margin-top: 10px; display: none;">
+                <img id="preview" style="max-width: 200px; max-height: 120px;">
+              </div>
+              <input type="hidden" id="imageUrl" name="image">
+            </div>
+            <div class="form-group">
               <div class="example-box">
                 <label class="lyear-radio radio-inline radio-primary">
                   <input type="radio" checked="" name="status" value="0"><span>启用</span>
@@ -76,6 +84,32 @@
 </div>
 <th:block th:include="include :: table"/>
 <script type="text/javascript">
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#preview').attr('src', e.target.result);
+                $('#imagePreview').show();
+                
+                // 上传图片到服务器
+                var formData = new FormData();
+                formData.append('file', input.files[0]);
+                
+                axios.post('/api/upload', formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(res => {
+                    $('#imageUrl').val(res.data);
+                    lightyear.notify('图片上传成功', 'success', 100);
+                }).catch(err => {
+                    lightyear.notify('图片上传失败', 'danger', 100);
+                });
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     $(function () {
         var idData = [];
 
@@ -176,7 +210,13 @@
                 title: '实验类型'
             }, {
                 field: 'useType',
-                title: '教室性质'
+                title: '教室性质',
+                formatter: function (value, row, index) {
+                    if (row.image) {
+                        return '<img src="' + row.image + '" style="width: 100px; height: 60px; object-fit: cover;">';
+                    }
+                    return '暂无图片';
+                }
             }, {
                 field: 'admin',
                 title: '创建人'
@@ -210,6 +250,14 @@
                         $('#capacity').val(row.capacity);
                         $('#target').val(row.target);
                         $('#status').val(row.status);
+                        if (row.image) {
+                            $('#preview').attr('src', row.image);
+                            $('#imagePreview').show();
+                            $('#imageUrl').val(row.image);
+                        } else {
+                            $('#imagePreview').hide();
+                            $('#imageUrl').val('');
+                        }
                     },
                     'click #delete': function (e, value, row, index) {
                         axios.delete('/api/laboratory/' + row.id)

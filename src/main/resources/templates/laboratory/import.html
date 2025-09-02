@@ -153,6 +153,14 @@
             console.log(form);
             axios.post('/api/laboratory', form).then(res => {
                 lightyear.notify(res.data, 'success', 100);
+                // 重置表单
+                $('#importData')[0].reset();
+                // 清空图片预览
+                $('#img').empty();
+                // 重置图片URL
+                image = '';
+                // 重置文件输入框
+                $('#imgInput').val('');
             }).catch(err => {
                 lightyear.notify(err.response.data.message, 'danger', 100);
             })
