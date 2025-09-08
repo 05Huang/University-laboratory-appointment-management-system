@@ -151,4 +151,12 @@ public interface SysBorrowLaboratoryRepository extends JpaRepository<SysBorrowLa
      * 检查用户是否有指定状态的实验室预约
      */
     boolean existsByUserIdAndBorrowStatus(Long userId, String borrowStatus);
+
+    /**
+     * 根据用户ID和借用状态列表查询
+     * @param userId 用户ID
+     * @param borrowStatuses 借用状态列表
+     * @return 借用记录列表
+     */
+    List<SysBorrowLaboratory> findByUserIdAndBorrowStatusIn(Long userId, List<String> borrowStatuses);
 }

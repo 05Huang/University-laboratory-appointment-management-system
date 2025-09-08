@@ -301,6 +301,9 @@
                     if (row.borrowStatus === '8') {
                         return '<span class="label label-danger">已归还</span>'
                     }
+                    if (row.borrowStatus === '7') {
+                        return '<span class="label label-danger">使用中</span>'
+                    }
                     return '<span class="label label-success">审核通过</span>';
                 }
             }, {

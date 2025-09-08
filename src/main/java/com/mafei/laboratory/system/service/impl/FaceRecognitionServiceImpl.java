@@ -7,10 +7,13 @@ import com.mafei.laboratory.system.service.FaceRecognitionService;
 import com.mafei.laboratory.system.vo.FaceVerificationVO;
 import com.mafei.laboratory.system.repository.SysBorrowInstrumentRepository;
 import com.mafei.laboratory.system.repository.SysBorrowLaboratoryRepository;
+import com.mafei.laboratory.system.repository.SysInstrumentRepository;
+import com.mafei.laboratory.system.repository.SysLaboratoryRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -36,6 +39,12 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
     @Resource
     private SysBorrowLaboratoryRepository borrowLaboratoryRepository;
 
+    @Resource
+    private SysInstrumentRepository instrumentRepository;
+
+    @Resource
+    private SysLaboratoryRepository laboratoryRepository;
+
     @Value("${baidu.face.access-token}")
     private String accessToken;
 
@@ -52,6 +61,7 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
     private static final List<String> VALID_BORROW_STATUSES = Arrays.asList("0", "6", "7");
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public FaceVerificationVO verifyFace(MultipartFile file) {
         log.info("========== 开始人脸识别流程 ==========");
         log.info("接收到的文件信息 - 名称: {}, 大小: {} bytes, 类型: {}", 
@@ -116,6 +126,9 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
                             .build();
                     }
 
+                    // 更新预约状态为"使用中"
+                    updateBorrowStatus(face.getUserId());
+
                     log.info("验证完全通过 - 用户ID: {}", face.getUserId());
                     return FaceVerificationVO.builder()
                         .verified(true)
@@ -177,5 +190,43 @@ public class FaceRecognitionServiceImpl implements FaceRecognitionService {
         log.info("预约状态检查完成 - 用户ID: {}, 最终结果: {}", userId, hasAnyReservation);
         
         return hasAnyReservation;
+    }
+
+    /**
+     * 更新用户的预约状态为"使用中"
+     * @param userId 用户ID
+     */
+    private void updateBorrowStatus(Long userId) {
+        log.info("开始更新用户预约状态为使用中 - 用户ID: {}", userId);
+
+        // 更新实验室预约状态
+        borrowLaboratoryRepository.findByUserIdAndBorrowStatusIn(userId, Arrays.asList("0", "6"))
+            .forEach(borrow -> {
+                // 更新借用记录的状态
+                borrow.setBorrowStatus("7"); // 设置为使用中
+                borrow.setStatus("7"); // 设置为使用中
+                borrowLaboratoryRepository.save(borrow);
+                log.info("更新实验室预约状态为使用中 - 预约ID: {}", borrow.getId());
+
+                // 更新实验室状态
+                laboratoryRepository.updateStatus(borrow.getLaboratoryId(), "7");
+                log.info("更新实验室状态为使用中 - 实验室ID: {}", borrow.getLaboratoryId());
+            });
+
+        // 更新仪器预约状态
+        borrowInstrumentRepository.findByUserIdAndBorrowStatusIn(userId, Arrays.asList("0", "6"))
+            .forEach(borrow -> {
+                // 更新借用记录的状态
+                borrow.setBorrowStatus("7"); // 设置为使用中
+                borrow.setStatus("7"); // 设置为使用中
+                borrowInstrumentRepository.save(borrow);
+                log.info("更新仪器预约状态为使用中 - 预约ID: {}", borrow.getId());
+
+                // 更新仪器状态
+                instrumentRepository.updateStatus(borrow.getInstrumentId(), "7");
+                log.info("更新仪器状态为使用中 - 仪器ID: {}", borrow.getInstrumentId());
+            });
+
+        log.info("用户预约状态更新完成 - 用户ID: {}", userId);
     }
 } 
