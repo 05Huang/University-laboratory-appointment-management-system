@@ -25,6 +25,19 @@
         <fastjson.version>1.2.73</fastjson.version>
         <jjwt.version>0.11.2</jjwt.version>
     </properties>
+    <repositories>
+        <repository>
+            <id>aliyun</id>
+            <name>aliyun Repository</name>
+            <url>https://maven.aliyun.com/repository/public</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <!-- Spring 基本包 -->
         <dependency>
@@ -124,6 +137,17 @@
             <version>2.10.1</version>
         </dependency>
 
+        <!-- 添加Redis依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Redis连接池依赖 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-pool2</artifactId>
+        </dependency>
 
 
     </dependencies>

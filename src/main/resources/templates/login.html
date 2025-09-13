@@ -113,8 +113,10 @@
             <label for="captcha">验证码</label>
             <div class="captcha-group">
                 <input type="text" name="captcha" id="captcha" class="form-control" placeholder="请输入验证码">
-                <img th:src="@{/auth/captcha}" id="captchaImg" style="cursor: pointer;"
-                     onclick="this.src=this.src+'?'+Math.random();" title="点击刷新" alt="captcha">
+                <input type="hidden" name="uuid" id="uuid">
+                <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" 
+                     id="captchaImg" style="cursor: pointer; height: 38px; width: 120px;"
+                     title="点击刷新" alt="验证码加载中...">
             </div>
         </div>
 
@@ -188,25 +190,80 @@
         });
         return obj;
     };
+
+    // 刷新验证码
+    function refreshCaptcha(retryCount = 0) {
+        const maxRetries = 3;
+        
+        // 显示加载中的状态
+        $('#captchaImg').attr('alt', '验证码加载中...');
+        
+        // 先获取UUID
+        axios.get("/auth/captcha/uuid")
+            .then(res => {
+                if (res.data && res.data.uuid) {
+                    const uuid = res.data.uuid;
+                    $('#uuid').val(uuid);
+                    
+                    // 创建新的Image对象来预加载验证码图片
+                    const img = new Image();
+                    img.onload = function() {
+                        $('#captchaImg').attr('src', this.src);
+                        $('#captchaImg').attr('alt', '点击刷新验证码');
+                    };
+                    img.onerror = function() {
+                        if (retryCount < maxRetries) {
+                            setTimeout(() => refreshCaptcha(retryCount + 1), 500);
+                        } else {
+                            $('#captchaImg').attr('alt', '验证码加载失败');
+                            lightyear.notify('刷新验证码失败，请点击图片重试', 'danger', 200);
+                        }
+                    };
+                    img.src = '/auth/captcha/image/' + uuid + '?t=' + new Date().getTime();
+                }
+            })
+            .catch(err => {
+                if (retryCount < maxRetries) {
+                    setTimeout(() => refreshCaptcha(retryCount + 1), 500);
+                } else {
+                    $('#captchaImg').attr('alt', '验证码加载失败');
+                    lightyear.notify('刷新验证码失败，请点击图片重试', 'danger', 200);
+                }
+            });
+    }
+    
+    // 确保页面完全加载后再刷新验证码
+    $(window).on('load', function() {
+        refreshCaptcha();
+    });
+    
+    // 点击验证码图片时刷新
+    $('#captchaImg').click(function() {
+        refreshCaptcha();
+    });
+    
+    // 如果window.load事件在脚本执行时已经触发，则立即刷新验证码
+    if (document.readyState === 'complete') {
+        refreshCaptcha();
+    }
+
     $("#loginBtn").click(() => {
         let form = $("#loginForm").serializeObject();
         if (isEmpty("用户名", form.username) || isEmpty("密码", form.password) || isEmpty("验证码", form.captcha)) {
-            console.log(form);
+            return;
         }
-        // console.log(form)
         lightyear.loading('show');
         axios.post("/auth/login", form)
             .then(res => {
                 lightyear.loading('hide');
-                $.cookie('token', res.data, {expires: 3, path: '/'});//
+                $.cookie('token', res.data, {expires: 3, path: '/'});
                 location.href = "/index"
             }).catch(err => {
-            lightyear.loading('hide')
-            // console.log("err", err.response)
-            lightyear.notify(err.response.data.message, 'danger', 200)
-            $('#captchaImg').attr('src', '/auth/captcha' + '?' + Math.random())
-        })
-    })
+                lightyear.loading('hide');
+                lightyear.notify(err.response.data.message, 'danger', 200);
+                refreshCaptcha();
+            });
+    });
 
     function isEmpty(key, value) {
         if (value === null || value === undefined || value === "") {
