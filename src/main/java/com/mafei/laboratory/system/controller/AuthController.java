@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import org.springframework.http.HttpStatus;
 
 /**
  * @author wutangsheng
@@ -47,30 +48,51 @@ public class AuthController {
     private final CaptchaRedisUtils captchaRedisUtils;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@Validated @RequestBody LoginDto authUser, HttpServletRequest request) throws Exception {
+    public ResponseEntity<Object> login(@Validated @RequestBody LoginDto authUser, HttpServletRequest request) {
         String code = authUser.getCaptcha();
         String uuid = authUser.getUuid();
         
-        // 判断验证码
-        if (StringUtils.isBlank(code) || StringUtils.isBlank(uuid)) {
-            throw new BadRequestException("验证码不存在或已过期");
-        }
-        
-        // 验证验证码
-        if (!captchaRedisUtils.validateCaptcha(uuid, code)) {
-            throw new BadRequestException("验证码错误或已过期");
-        }
+        try {
+            // 判断验证码参数
+            if (StringUtils.isBlank(code) || StringUtils.isBlank(uuid)) {
+                return ResponseEntity.badRequest()
+                    .body(new HashMap<String, String>() {{
+                        put("message", "请输入验证码");
+                    }});
+            }
+            
+            // 验证验证码
+            if (!captchaRedisUtils.validateCaptcha(uuid, code)) {
+                return ResponseEntity.badRequest()
+                    .body(new HashMap<String, String>() {{
+                        put("message", "验证码错误或已过期");
+                    }});
+            }
 
-        // 验证数据库里的账号密码是否正确
-        LoginUserVo user = userService.queryByUsername(authUser);
-        // 构造token所需要的数据
-        Map<String, Object> map = new HashMap<>(4);
-        map.put("userId", user.getUserId());
-        map.put("roleId", user.getRoleId());
+            // 验证数据库里的账号密码是否正确
+            LoginUserVo user = userService.queryByUsername(authUser);
+            
+            // 构造token所需要的数据
+            Map<String, Object> map = new HashMap<>(4);
+            map.put("userId", user.getUserId());
+            map.put("roleId", user.getRoleId());
 
-        String token = JwtUtils.createToken(map);
-        //返回菜单
-        return ResponseEntity.ok(token);
+            String token = JwtUtils.createToken(map);
+            return ResponseEntity.ok(token);
+            
+        } catch (BadRequestException e) {
+            // 用户名密码错误等业务异常
+            return ResponseEntity.badRequest()
+                .body(new HashMap<String, String>() {{
+                    put("message", e.getMessage());
+                }});
+        } catch (Exception e) {
+            log.error("登录过程发生未知错误", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new HashMap<String, String>() {{
+                    put("message", "服务器内部错误，请稍后重试");
+                }});
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ import com.mafei.laboratory.commons.exception.BadRequestException;
 import com.mafei.laboratory.commons.security.TokenProperties;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -18,6 +19,7 @@ import java.util.UUID;
  * @create 2021-02-10 21:32
  * @info JWT token jjwt
  */
+@Slf4j
 public class JwtUtils {
     /**
      * 创建token
@@ -41,36 +43,51 @@ public class JwtUtils {
 
     /**
      * token 解析
-     *
-     * @param token
-     * @return
+     * @param token JWT token
+     * @return Claims
      */
     public static Map<String, Object> parseToken(String token) {
-        Jws<Claims> jws = null;
         try {
-            jws = Jwts.parserBuilder()
+            return Jwts.parserBuilder()
                     .setSigningKey(generateKey())
                     .build()
-                    .parseClaimsJws(token);
-
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            log.debug("Token已过期: {}", e.getMessage());
+            throw new BadRequestException(HttpStatus.UNAUTHORIZED, "登录已过期，请重新登录");
         } catch (JwtException e) {
-            throw new BadRequestException(HttpStatus.FORBIDDEN, "token失效，请重新登录");
+            log.debug("Token解析失败: {}", e.getMessage());
+            throw new BadRequestException(HttpStatus.UNAUTHORIZED, "登录状态无效，请重新登录");
+        } catch (Exception e) {
+            log.error("Token解析过程发生未知错误", e);
+            throw new BadRequestException(HttpStatus.INTERNAL_SERVER_ERROR, "服务器内部错误，请稍后重试");
         }
-        return jws.getBody();
     }
 
     /**
      * 验证token
-     *
-     * @param token
-     * @return
+     * @param token JWT token
+     * @return 是否有效
      */
     public static boolean verifyToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(generateKey()).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                .setSigningKey(generateKey())
+                .build()
+                .parseClaimsJws(token);
             return true;
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | IllegalArgumentException e) {
-            e.printStackTrace();
+        } catch (ExpiredJwtException e) {
+            // Token过期，不记录堆栈
+            log.debug("Token已过期: {}", e.getMessage());
+            return false;
+        } catch (JwtException e) {
+            // 其他JWT相关异常，不记录堆栈
+            log.debug("Token验证失败: {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            // 其他未预期的异常，记录堆栈
+            log.error("Token验证过程发生未知错误", e);
             return false;
         }
     }
