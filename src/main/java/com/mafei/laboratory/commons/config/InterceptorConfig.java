@@ -22,21 +22,24 @@ public class InterceptorConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         InterceptorRegistration addInterceptor = registry.addInterceptor(globalInterceptor);
+        
+        // 拦截所有请求
         addInterceptor.addPathPatterns("/**");
         addInterceptor.addPathPatterns("/api/**");
         addInterceptor.addPathPatterns("/index");
 
         // 排除配置
-        addInterceptor.excludePathPatterns("/auth/**");
-//        addInterceptor.excludePathPatterns("/api/**");
-        addInterceptor.excludePathPatterns("/login");
-        addInterceptor.excludePathPatterns("/logout");
-        addInterceptor.excludePathPatterns("/register");
-        addInterceptor.excludePathPatterns("/js/**");
-        addInterceptor.excludePathPatterns("/css/**");
-        addInterceptor.excludePathPatterns("/images/**");
-        addInterceptor.excludePathPatterns("/fonts/**");
+        addInterceptor.excludePathPatterns(
+            "/auth/**",           // 认证相关
+            "/login",            // 登录页面
+            "/logout",           // 登出
+            "/register",         // 注册
+            "/api/face-recognition/**",  // 人脸识别API
+            "/access/**",        // 门禁相关
+            "/js/**",           // 静态资源
+            "/css/**",
+            "/images/**",
+            "/fonts/**"
+        );
     }
-
-
 }
