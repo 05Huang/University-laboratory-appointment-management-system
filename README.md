@@ -1,87 +1,63 @@
-# laboratory
+# 实验室管理系统 🔬
 
-### 介绍
+<div align="center">
 
-一个简单的实验室管理系统，可用于毕设，入门教学。
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.4.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![JDK](https://img.shields.io/badge/JDK-1.8-orange.svg)](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
+[![MySQL](https://img.shields.io/badge/MySQL-5.7+-blue.svg)](https://www.mysql.com/)
+[![Redis](https://img.shields.io/badge/Redis-最新版本-red.svg)](https://redis.io/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-没有用很多新技术，加之业务逻辑简单，所以拓展和修改都很方便。
+_✨ 一款现代化高效实验室管理系统 ✨_
 
-> 轻喷，本人菜鸟，项目还在完善中。本来打算直接使用开源项目 [若依](http://www.ruoyi.vip/) 或者 [eladmin](https://gitee.com/elunez/eladmin) 修改的，但是为了素材没那么复杂，就自己写了个超简单的实验室管理系统。
+[简体中文](./README.zh-CN.md) | 英文
 
-#### 目录结构：
+</div>
 
-![image-20210313003831699](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/003832-574587.png)
+## 🌟 功能特点
 
-#### commons
+- 🔐 多角色用户管理（管理员/教师/学生）
+- 📅 智能实验室预约系统
+- 📊 设备管理与追踪
+- 📈 使用统计生成
+- 🔔 人脸录入与识别
+- 🎨 现代化响应式界面
 
-一些工具和配置。
+## 🚀 快速开始
 
-#### page
+### 前置条件
 
-管理前端页面。
+- JDK 1.8及以上版本
+- Maven 3.x
+- MySQL 5.7及以上版本
+- Redis
 
-#### system
+### 安装步骤
 
-主要业务逻辑都在这里了。
+1. 克隆仓库
+```bash
+git clone https://github.com/your-username/laboratory.git
+```
 
+2. 配置数据库
+```bash
+# 从/sql目录导入SQL文件
+mysql -u 你的用户名 -p 你的数据库名 < sql/laboratory.sql
+```
 
+3. 配置application.properties
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/你的数据库名
+spring.datasource.username=你的用户名
+spring.datasource.password=你的密码
+```
 
-###  软件架构
+4. 运行应用
+```bash
+mvn spring-boot:run
+```
 
-**SpringBoot + JPA + MySQL + Thymeleaf**
-
-其中前端模板特别感谢：[笔下光年/Light Year Admin Using Iframe](https://gitee.com/yinqi/Light-Year-Admin-Using-Iframe)
-
-### 账号
-
-管理员：2017250082 
-
-老师：2017250083 
-
-学生：2017250084 
-
-密码都是 123456
-
-### 运行教程
-
-> 使用IDEA打开项目，因为引入了Lombok， 所以需要下载Lombok插件
-
-1. 导入SQL
-2. 启动项目
-3. 浏览器输入地址，**127.0.0.1:8080/index**
-
-### 项目截图
-
-**登录页**
-
-![image-20210313005852340](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202102/21/image-20210313005232992.png)
-
-
-
-**管理员**
-
-![image-20210313005339962](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005341-813709.png)
-
-![image-20210313005409762](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005410-707592.png)
-
-**老师**
-
-![image-20210313005454692](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005456-825782.png)
-
-![image-20210313005518988](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005520-650254.png)
-
-**学生**
-
-![image-20210313005556656](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005605-174489.png)
-
-![image-20210313005606834](https://wts-blog.oss-cn-beijing.aliyuncs.com/typora/202103/13/005607-811252.png)
-
-### 特别感谢
-
-**EL-ADMIN 后台管理系统**  https://gitee.com/elunez/eladmin
-
-**若依** http://www.ruoyi.vip/
-
-**Light Year Admin Using Iframe 光年后台模板的iframe版本** https://gitee.com/yinqi/Light-Year-Admin-Using-Iframe
-
- 
+5. 访问应用
+```
+http://localhost:8080/index
+```
